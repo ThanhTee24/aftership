@@ -442,7 +442,7 @@ class TrackingController extends Controller
 
 
         $json = json_decode($response);
-
+dd($json);
         return $json;
     }
 
@@ -1199,6 +1199,48 @@ class TrackingController extends Controller
     }
 }
 
+    public function call_ibedding($order_id){
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "http://plus.esrax.com/Api/ibedding/?OrderId=" . $order_id,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $json = json_decode($response);
+dd($json);
+        return $json;
+    }
+
+    public function handling_ibedding($json, $order_id){
+        if (isset($json->orderDataList[0])) {
+            $orderDataList = $json->orderDataList[0];
+
+            $order_id_update = array(
+                'order_id' => $order_id
+            );
+
+            $form_data = array(
+                'tracking_number' => $orderDataList->trackNumber,
+                'courier' => $orderDataList->shippingService,
+                'supplier_access' => 1
+            );
+            var_dump($form_data);
+
+            Tracking::updateOrCreate($order_id_update, $form_data);
+        }
+    }
+
 public
 function CallTracking(Request $request)
 {
@@ -1224,23 +1266,22 @@ function CallTracking(Request $request)
 //////
 //////        //DHL=====================================================================
 //////
-//        $dhl = Tracking::
-//        where('courier', '=', 'DHL')
-//            ->orwhere('courier', '=', 'DHL eCommerce')
-//            ->where('approved', '=', null)
-//            ->where('length(tracking_number)', '>', 12)
-//            ->select('id', 'tracking_number')->get();
-//
-//        foreach ($dhl as $value) {
-//
-//            $tracking_number = $value->tracking_number;
-//            $id = $value->id;
-//            var_dump($tracking_number);
-//
-//            $json = $this->call_dhl($tracking_number);
-//
-//            $form_data = $this->handling_dhl($json, $tracking_number, $id);
-//        }
+        $dhl = Tracking::
+        where('courier', '=', 'DHL')
+            ->orwhere('courier', '=', 'DHL eCommerce')
+            ->where('approved', '=', null)
+            ->select('id', 'tracking_number')->get();
+
+        foreach ($dhl as $value) {
+
+            $tracking_number = $value->tracking_number;
+            $id = $value->id;
+            var_dump($tracking_number);
+
+            $json = $this->call_dhl('9361269903504977073253');
+
+            $form_data = $this->handling_dhl($json, $tracking_number, $id);
+        }
 ////
 //////////        //Fedex=====================================================================
 //////
@@ -1296,20 +1337,20 @@ function CallTracking(Request $request)
 //
 ////        YANWEN===========================================
 //
-        $yanwen = Tracking::where('courier', '=', 'YANWEN')
-            ->where('approved', '=', null)
-            ->select('id', 'tracking_number')->get();
-
-        foreach ($yanwen as $value) {
-            $tracking_number = $value->tracking_number;
-            $id = $value->id;
-            var_dump($tracking_number);
-
-            $json = $this->call_yanwen('UF168048361YP');
-
-            $form_data = $this->handling_yanwen($json, $tracking_number, $id);
-
-        }
+//        $yanwen = Tracking::where('courier', '=', 'YANWEN')
+//            ->where('approved', '=', null)
+//            ->select('id', 'tracking_number')->get();
+//
+//        foreach ($yanwen as $value) {
+//            $tracking_number = $value->tracking_number;
+//            $id = $value->id;
+//            var_dump($tracking_number);
+//
+//            $json = $this->call_yanwen('UF168048361YP');
+//
+//            $form_data = $this->handling_yanwen($json, $tracking_number, $id);
+//
+//        }
 
 //    $dhl = Tracking::
 ////        where('courier', '=', 'DHL')
@@ -1330,6 +1371,19 @@ function CallTracking(Request $request)
 //        $form_data = $this->convertDhltoUsps($json, $tracking_number, $id);
 //
 //    }
+
+    $ibeđing = Tracking::select('order_id')->where('supplier', 'Tony')
+        ->where('tracking_number', null)->get();
+
+    foreach ($ibeđing as $value) {
+
+        $order_id = $value->order_id;
+        var_dump($order_id);
+
+        $json = $this->call_ibedding('607207');
+
+        $form_data = $this->handling_ibedding($json, $order_id);
+    }
 
 }
 }

@@ -418,8 +418,13 @@
                     {"data": "paypal_account"},
                     {"data": "transaction_id"},
                     {"data": "courier"},
-                    {"data": "tracking_number"},
-                    {"data": "tracking_date"},
+                    {"data": "tracking_number",
+                        render: function (data) {
+                            dataRender = '<label style=" width: 130px; height: 50px;text-overflow: ellipsis;">' + data + '</label>';
+
+                            return dataRender;
+                        }},
+                    {"data": "process_date"},
                     {"data": "status"},
                     {
                         "data": "update_status",
@@ -458,27 +463,25 @@
         function filterGlobal() {
             $('#paypal_table').DataTable().search(
                 $('#global_filter').val()
-                // $('#global_regex').prop('checked'),
-                // $('#global_smart').prop('checked')
+
             ).draw();
         }
 
         function filterColumn(i) {
             $('#paypal_table').DataTable().column(i).search(
                 $('#col' + i + '_filter').val()
-                // $('#col'+i+'_regex').prop('checked'),
-                // $('#col'+i+'_smart').prop('checked')
+
             ).draw();
         }
 
         $(document).ready(function () {
             $('#paypal_table').DataTable();
 
-            $('input.global_filter').on('keyup click', function () {
+            $('input.global_filter').on('keyup change', function () {
                 filterGlobal();
             });
 
-            $('input.column_filter').on('keyup click', function () {
+            $('input.column_filter').on('keyup change', function () {
                 filterColumn($(this).parents('div').attr('data-column'));
             });
         });

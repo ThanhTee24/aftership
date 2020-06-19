@@ -23,6 +23,24 @@
             min-height: 1.5em;
             padding: 5px;
         }
+
+        td p {
+            width: 200px;
+            height: 40px;
+            overflow: hidden;
+            /*text-overflow: ellipsis;*/
+            /*transition: width 1s, height 2s;*/
+
+        }
+        /*td p:focus{*/
+        /*    width: 300px;*/
+        /*    height: 70px;*/
+        /*}*/
+
+        /*td p:hover {*/
+        /*    width: 300px;*/
+        /*    height: 70px;*/
+        /*}*/
     </style>
 
     <div class="card-body">
@@ -280,15 +298,29 @@
                 <div class="modal-body">
                     <div class="form-group" hidden>
                         <label class="control-label col-sm-6" for="name">Courier</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-12">
                             <input type="text" class="form-control" id="tracking_number_detail" disabled>
                         </div>
                     </div>
-                    <table class="table table-bordered table-checkable">
+
+                {{-- kiet --}}
+                <!--begin::Body-->
+                    <ul class="timeline trackingdetail">
+                        <li id="">
+                            <a target="_blank" href="https://www.totoprayogo.com/#">New Web Design</a>
+                            <a href="#" class="float-right">21 March, 2014</a>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque scelerisque diam non nisi semper, et elementum lorem ornare. Maecenas placerat facilisis mollis. Duis sagittis ligula in sodales vehicula....</p>
+                        </li>
+                    </ul>
+
+                    <!--end::Body-->
+
+
+                    {{-- <table class="table table-bordered table-checkable">
                         <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Status</th>
+                            <th class="date-detail">Date</th>
+                            <th class="status-detail">Status</th>
                             <th>Detail</th>
                         </tr>
                         </thead>
@@ -299,7 +331,7 @@
                             <td></td>
                         </tr>
                         </tbody>
-                    </table>
+                    </table> --}}
                 </div>
             </div>
         </div>
@@ -319,13 +351,17 @@
                             <div class="form-group" style="width: 100%;display: flex">
                                 <label>Order Date</label><br>
                                 <div style="width: 50%;display: flex">
+                                    <span class="error1 text-center text-danger hidden"></span>
                                     <label>Từ ngày:</label>
                                     <input type="date" name="export_todate" class="form-control" required>
+
                                 </div>
 
                                 <div style="width: 50%;display: flex">
+                                    <span class="error2 text-center text-danger hidden"></span>
                                     <label>Đến ngày</label>
                                     <input type="date" name="export_fromdate" class="form-control" required>
+
                                 </div>
 
                             </div>
@@ -344,7 +380,7 @@
                 </form>
 
                 <div class="modal-footer">
-                    <button class="btn btn-success" type="submit" id="export-file">
+                    <button class="btn btn-success" type="submit" id="export-file-select">
                         <span class=""></span>Export file
                     </button>
                     <button class="btn btn-warning" type="button" data-dismiss="modal">
@@ -485,7 +521,7 @@
                     {
                         "data": "tracking_number",
                         render: function (data) {
-                            dataRender = '<label style=" width: 150px; height: 50px; max-width: 200px; max-height: 100px; min-width: 150px; min-height: 50px; overflow: auto">' + data + '</label>';
+                            dataRender = '<label style=" width: 130px; height: 50px;text-overflow: ellipsis;">' + data + '</label>';
 
                             return dataRender;
                         }
@@ -496,11 +532,14 @@
                     {"data": "status"},
                     {
                         "data": "process_content",
-                        // render: function (data) {
-                        //     dataRender = '<p style="with=30px;" ">'+data+'</p>';
-                        //
-                        //     return dataRender;
-                        // }
+                        render: function (data) {
+                            if (data == null) {
+                                dataRender = '<p></p>';
+                            } else {
+                                dataRender = '<p>' + data + '</p>';
+                            }
+                            return dataRender;
+                        }
                     },
                     {"data": "process_date"},
                     {"data": "total"},
@@ -534,19 +573,18 @@
         function filterColumn(i) {
             $('#myTable').DataTable().column(i).search(
                 $('#col' + i + '_filter').val()
-                // $('#col'+i+'_regex').prop('checked'),
-                // $('#col'+i+'_smart').prop('checked')
             ).draw();
         }
+
 
         $(document).ready(function () {
             $('#myTable').DataTable();
 
-            $('input.global_filter').on('keyup click', function () {
+            $('input.global_filter').on('keyup change', function () {
                 filterGlobal();
             });
 
-            $('input.column_filter').on('keyup click', function () {
+            $('input.column_filter').on('keyup change', function () {
                 filterColumn($(this).parents('div').attr('data-column'));
             });
         });
@@ -557,27 +595,6 @@
 
 
     </script>
-    <script>
-        function docthem() {
-
-            var dots = document.getElementById("dots" + id);
-            var moreText = document.getElementById("more");
-            var btnText = document.getElementById("myBtn");
-
-            if (dots.style.display === "none") {
-                dots.style.display = "inline";
-                dots.style.cursor = "pointer";
-                dots.style.color = "red";
-                dots.style.marginleft = "15px";
-                btnText.innerHTML = "Read more";
-                moreText.style.display = "none";
-            } else {
-                dots.style.display = "none";
-                btnText.innerHTML = "Read less";
-                moreText.style.display = "inline";
-            }
-        }
-    </script>
 
     <script type="text/javascript">
         $(document).on('click', '.export-modal', function () {
@@ -585,7 +602,7 @@
             $('.modal-title').text('Export');
         });
 
-        $("#export-file").click(function () {
+        $("#export-file-select").click(function () {
             $.ajax({
                 type: 'POST',
                 url: 'exportTracking',
@@ -596,11 +613,12 @@
                     'supplier': $('select[name=export_supplier]').val(),
                 },
                 success: function (data) {
+                    console.log(data);
                     if ((data.errors)) {
-                        $('#message').html(data.message);
-                        $('.error').text(data.errors.to_date);
-                        $('.error').text(data.errors.from_date);
-                        $('.error').text(data.errors.supplier);
+                        $('error1').removeClass('hidden');
+                        $('error2').removeClass('hidden');
+                        $('.error1').text(data.errors.to_date);
+                        $('.error2').text(data.errors.from_date);
                     } else {
                         const workbook = XLSX.utils.book_new();
                         const myHeader = [];
@@ -610,7 +628,7 @@
                         range.e['c'] = myHeader.length - 1;
                         worksheet['!ref'] = XLSX.utils.encode_range(range);
 
-                        XLSX.utils.book_append_sheet(workbook, worksheet, 'tab1');
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'Tracking');
                         XLSX.writeFile(workbook, 'Tracking.xlsx');
                     }
                 }

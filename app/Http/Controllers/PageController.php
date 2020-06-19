@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Model\Crawl_bighub;
 use App\Model\Detail;
 use App\Model\List_supplier;
+use App\Model\Paypal_acconut;
 use App\Model\Tracking;
 use Facades\App\Respository\Tracking_cache;
 use App\Model\Delivery_status;
@@ -31,7 +32,6 @@ class PageController extends Controller
 
     public function getPage()
     {
-
         $list_supplier = List_supplier::all();
         return view('page', compact('list_supplier'));
     }
@@ -41,24 +41,25 @@ class PageController extends Controller
         $start = request()->get('start');
         $length = request()->get('length');
 
-        $data = DB::table('delivery_status')
-            ->Join('detail', function ($join) {
-                $join->on('delivery_status.id', '=', 'detail.delivery_status')
-                    ->where('detail.step_number', '=', 0);
-            })
+        $data = DB::table('delivery_status')->Join('detail', function ($join) {
+            $join->on('delivery_status.id', '=', 'detail.delivery_status')
+                ->where('detail.step_number', '=', 0);
+        })
             ->rightJoin('tracking', 'detail.tracking_number', '=', 'tracking.tracking_number')
+            ->where('tracking.tracking_number', '<>', null)
             ->select('tracking.id', 'tracking.order_date', 'tracking.order_id', 'tracking.courier',
                 'tracking.tracking_number', 'tracking.tracking_date', 'tracking.count_day', 'tracking.note', 'tracking.created_at',
                 'tracking.supplier', 'tracking.approved',
                 'detail.process_content', 'detail.process_date', 'delivery_status.name as status',
                 'detail.total_day as total')
-            ->orderBy('count_day', 'DESC')->take(20)
-            ->get();
+            ->orderBy('count_day', 'DESC');
 
-        return DataTables()::of($data)->addColumn('action', function ($value) {
-            $button = '<div style="display: inline-block"> <a class="detail-modal btn btn-xs btn-clean btn-icon"
-                                                      data-tracking_number="' . $value->tracking_number . '">
-                                                      <i class="fa fa-search text-warning mr-5 icon-md"></i></a>';
+        return DataTables()::of($data)
+            ->addColumn('action', function ($value) {
+            $button = '<a class="detail-modal btn btn-xs btn-clean btn-icon"
+                                data-tracking_number="' . $value->tracking_number . '">
+                                <i class="fa fa-history text-warning icon-md"></i>
+                                </a>';
             $button .= '&nbsp;&nbsp;';
             $button .= '<a class="edit-modal btn btn-xs btn-clean btn-icon" title="Edit" data-id="' . $value->id . '"
                            data-order_date="' . $value->order_date . '" data-order_id="' . $value->order_id . '"
@@ -68,21 +69,69 @@ class PageController extends Controller
                            data-content="' . ucwords(strtolower($value->process_content)) . '"
                            data-process_date="' . $value->process_date . '" data-total="' . $value->total . '"
                            data-note="' . $value->note . '">
-                            <i class="flaticon2-pen icon-md text-danger"></i>
+                           <i class="fa fa-pencil-alt icon-md text-danger"></i>
                         </a>';
             $button .= '&nbsp;&nbsp;';
             $button .= '<a class="update-modal btn btn-xs btn-clean btn-icon" title="Update" data-id="' . $value->id . '"
                            data-order_date="' . $value->order_date . '" data-order_id="' . $value->order_id . '"
                            data-courier="' . $value->courier . '" data-tracking_number="' . $value->tracking_number . '">
-                            <i class="ki ki-round icon-md text-success"></i>
-                        </a></div>';
+                            <i class="fa fa-upload icon-md text-update"></i>
+                        </a>';
 
             return $button;
         })
             ->rawColumns(['action'])
-            ->make(true);
-
-
+            ->filterColumn('order_id', function($query, $keyword) {
+                $sql = "tracking.order_id like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('order_date', function($query, $keyword) {
+                $sql = "tracking.order_date like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('courier', function($query, $keyword) {
+                $sql = "tracking.courier like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('tracking_number', function($query, $keyword) {
+                $sql = "tracking.tracking_number like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('tracking_date', function($query, $keyword) {
+                $sql = "tracking.tracking_date like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('count_day', function($query, $keyword) {
+                $sql = "tracking.count_day like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('supplier', function($query, $keyword) {
+                $sql = "tracking.supplier like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $sql = "delivery_status.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('process_content', function($query, $keyword) {
+                $sql = "detail.process_content like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('process_date', function($query, $keyword) {
+                $sql = "detail.process_date like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('total', function($query, $keyword) {
+                $sql = "detail.total_day like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('note', function($query, $keyword) {
+                $sql = "tracking.note like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+//            ->skipTotalRecords(10)
+//            ->setFilteredRecords(1000)
+            ->toJson();
     }
 
     function csvToArray($filename = '', $delimiter = ',')
@@ -140,7 +189,8 @@ class PageController extends Controller
 
     public function import(Request $request)
     {
-        $file = $request->file;
+        $file = $request->file('files');
+
         $validator = Validator::make(
             [
                 'file' => $file,
@@ -151,9 +201,9 @@ class PageController extends Controller
                 'extension' => 'required|in:csv',
             ]
         );
+
         if ($validator->passes()) {
             try {
-                $file = request()->file('file');
                 $customerArr = $this->csvToArray($file);
                 return back();
             } catch (\Exception $e) {
@@ -209,31 +259,17 @@ class PageController extends Controller
 
     public function getpaypal()
     {
-
-//        $data = DB::table('tracking') ->leftJoin('detail', function ($join) {
-//            $join->on('tracking.id', '=', 'detail.tracking_id')
-//                ->where('detail.step_number', '=', 0);
-//        })
-//            ->leftJoin('delivery_status', 'detail.delivery_status', '=', 'delivery_status.id')
-//            ->select('tracking.id', 'tracking.order_date', 'tracking.order_id', 'tracking.courier',
-//                'tracking.tracking_number', 'tracking.tracking_date', 'tracking.paypal_account', 'tracking.update_status',
-//                'tracking.created_at', 'tracking.transaction_id',
-//                'detail.process_content', 'detail.process_date', 'delivery_status.name as status',
-//                'detail.total_day as total')
-//            ->get();
-
-        $data = DB::table('delivery_status')
-            ->Join('detail', function ($join) {
-                $join->on('delivery_status.id', '=', 'detail.delivery_status')
-                    ->where('detail.step_number', '=', 0);
-            })
+        $data = Delivery_status::query()->Join('detail', function ($join) {
+            $join->on('delivery_status.id', '=', 'detail.delivery_status')
+                ->where('detail.step_number', '=', 0);
+        })
             ->rightJoin('tracking', 'detail.tracking_number', 'tracking.tracking_number')
+            ->where('tracking.tracking_number', '<>', null)
             ->select('tracking.id', 'tracking.order_date', 'tracking.order_id', 'tracking.courier',
                 'tracking.tracking_number', 'tracking.tracking_date', 'tracking.paypal_account', 'tracking.update_status',
                 'tracking.created_at', 'tracking.transaction_id',
                 'detail.process_content', 'detail.process_date', 'delivery_status.name as status',
-                'detail.total_day as total')
-            ->get();
+                'detail.total_day as total');
 
 
         return DataTables()::of($data)->addColumn('action', function ($value) {
@@ -259,10 +295,52 @@ class PageController extends Controller
                            data-paypal_account="' . $value->paypal_account . '" data-transaction_id="' . $value->transaction_id . '">
                             <i class="ki ki-round icon-lg text-success"></i>
                         </a>';
+
+
             return $button;
         })
             ->rawColumns(['action'])
-            ->make(true);
+            ->filterColumn('order_id', function($query, $keyword) {
+                $sql = "tracking.order_id like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('order_date', function($query, $keyword) {
+                $sql = "tracking.order_date like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('paypal_account', function($query, $keyword) {
+                $sql = "tracking.paypal_account like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('transaction_id', function($query, $keyword) {
+                $sql = "tracking.transaction_id like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('courier', function($query, $keyword) {
+                $sql = "tracking.courier like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('tracking_number', function($query, $keyword) {
+                $sql = "tracking.tracking_number like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('process_date', function($query, $keyword) {
+                $sql = "detail.process_date like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $sql = "delivery_status.name like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+            ->filterColumn('update_status', function($query, $keyword) {
+                $sql = "tracking.update_status like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+
+            ->skipTotalRecords(10)
+//            ->setFilteredRecords(1000)
+            ->toJson(true);
 
     }
 
@@ -277,32 +355,21 @@ class PageController extends Controller
 
         $detail = Detail::where('tracking_number', $request->tracking_number)->orderBy('detail.process_date', 'desc')
             ->rightJoin('delivery_status', 'detail.delivery_status', '=', 'delivery_status.id')
-            ->select('detail.process_content', 'detail.process_date', 'delivery_status.name as status')->get();
+            ->select('detail.process_content', 'detail.process_date', 'delivery_status.name as status', 'delivery_status.id')->get();
 
-        $detail_0 = Detail::where('tracking_number', $request->tracking_number)
-            ->where('step_number', 0)
-            ->leftJoin('delivery_status', 'detail.delivery_status', '=', 'delivery_status.id')
-            ->select('detail.process_content', 'detail.process_date', 'delivery_status.name as status')->get();
         $output_body = '';
 
-//        foreach ($detail_0 as $value) {
-//            $output_detail = '<tr>
-//                            <td>' . $value->process_date . '</td>
-//                            <td>' . $value->status . '</td>
-//                            <td >' . $value->process_content . '</td>
-//                       </tr>';
-//        }
         foreach ($detail as $value) {
-            $output_body .= '<tr>
-                            <td>' . $value->process_date . '</td>
-                            <td>' . $value->status . '</td>
-                            <td >' . $value->process_content . '</td>
-                       </tr>';
+            $output_body .= '<li id="c' . $value->id . '">
+                                <a target="_blank" style="font-weight: bold;">' . $value->status . '</a>
+                                <a class="float-right" style="font-weight: bold;">' . $value->process_date . '</a>
+                                <p>' . $value->process_content . '</p>
+                            </li>';
         }
 
-        $data = '<tbody class="trackingdetail">
-        ' . $output_body . '
-        </tbody>';
+        $data = '<ul class="timeline trackingdetail">
+                    ' . $output_body . '
+                </ul>';
 
         return response()->json($data);
     }
@@ -322,9 +389,11 @@ class PageController extends Controller
 
         );
 
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make(Input::all(), $rules);
 
-        if ($validator->passes()) {
+        if ($validator->fails()) {
+            return Response::json(array('errors' => $validator->getMessageBag()->toarray()));
+        } else {
 
             $to_date = $request->to_date;
             $from_date = $request->from_date;
@@ -347,14 +416,54 @@ class PageController extends Controller
                     'detail.total_day as total')
                 ->get();
 
-            if ($data_export == null) {
-                return "Không có dữ liệu export";
+
+            if (empty($data_export->toArray())) {
+                return Response::json(array('Empty' => 'Data empty'));
             } else {
                 return $data_export;
             }
-        } else {
-            return $validator->errors();
         }
+    }
+
+    public function GetPaypalAccount()
+    {
+
+        return view('paypal_account');
+    }
+
+    public function GetDataAccount()
+    {
+
+        $data_account = Paypal_acconut::query();
+
+        return DataTables()::of($data_account)->make(true);
+    }
+
+    public function AddAccount(Request $request)
+    {
+
+        $rules = array(
+            'to_date' => 'required|before:from_date',
+            'from_date' => 'required|after:to_date',
+            'paypal_account' => 'required'
+        );
+
+        $validator = Validator::make(Input::all(), $rules);
+
+        if ($validator->fails()) {
+            return Response::json(array('errors' => $validator->getMessageBag()->toarray()));
+        } else {
+
+            $form_data = array(
+                'to_date' => $request->to_date,
+                'from_date' => $request->from_date,
+                'paypal_account' => $request->paypal_account
+            );
+
+            Paypal_acconut::create($form_data);
+            return Response::json(array('success' => 'success'));
+        }
+
     }
 
 }

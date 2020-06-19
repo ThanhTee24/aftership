@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Model\Delivery_status;
 
 class Detail extends Model
 {
@@ -25,11 +26,11 @@ class Detail extends Model
         return $query->where('detail.total_day', $total);
     }
 
-    public function Detail(){
-        return $this->hasOne('App\Model\Delivery_status','id','id');
+    public function Delivery(){
+        return $this->belongsTo(Delivery_status::class,'delivery_status', 'id');
     }
 
-    public function Tracking(){
-        return $this->hasOne('App\Model\Tracking','tracking_number','tracking_number');
+    public function detail_tracking(){
+        return $this->hasOne(Tracking::class);
     }
 }

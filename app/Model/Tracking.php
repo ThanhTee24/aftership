@@ -41,7 +41,7 @@ class Tracking extends Model
         return $query->where('tracking.count_day', 'like', '%'. $count_day . '%');
     }
 
-    public function Detail(){
-        return $this->belongsTo('App\Model\Detail','tracking_number','tracking_number');
+    public function tracking_detail(){
+        return $this->hasMany(Detail::class);
     }
 }

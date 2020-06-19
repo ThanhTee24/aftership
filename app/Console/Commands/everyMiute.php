@@ -537,7 +537,7 @@ class everyMiute extends Command
                             $delivery_status = 4;
                         } elseif ($value->description == 'Shipment on hold') {
                             $delivery_status = 7;
-                        } elseif ($value->description == 'Delivered') {
+                        } elseif (preg_match('/Delivered/', $value->description) == true) {
                             $delivery_status = 5;
                         } elseif ($value->description == 'Shipment information received') {
                             $delivery_status = 1;
@@ -592,7 +592,8 @@ class everyMiute extends Command
         }
     }
 
-    public function call_usps($tracking_number){
+    public function call_usps($tracking_number)
+    {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -616,7 +617,8 @@ class everyMiute extends Command
         return $json;
     }
 
-    public function handling_usps($json, $tracking_number, $id){
+    public function handling_usps($json, $tracking_number, $id)
+    {
         if (isset($json->TrackResponse)) {
 
             $TrackResponse = $json->TrackResponse;
@@ -777,12 +779,13 @@ class everyMiute extends Command
         }
     }
 
-    public function call_yanwen($tracking_number){
+    public function call_yanwen($tracking_number)
+    {
 
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "http://shipping.esrax.com/yw/?trackingnumber=". $tracking_number,
+            CURLOPT_URL => "http://shipping.esrax.com/yw/?trackingnumber=" . $tracking_number,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -801,7 +804,8 @@ class everyMiute extends Command
         return $json;
     }
 
-    public function handling_yanwen($json, $tracking_number, $id){
+    public function handling_yanwen($json, $tracking_number, $id)
+    {
         if ($json != null) {
             if ($json->result == null) {
 
@@ -904,7 +908,8 @@ class everyMiute extends Command
         }
     }
 
-    public function call_fedex($tracking_number){
+    public function call_fedex($tracking_number)
+    {
 
         $curl = curl_init();
 
@@ -927,7 +932,8 @@ class everyMiute extends Command
         return $json;
     }
 
-    public function handling_fedex($json, $tracking_number, $id){
+    public function handling_fedex($json, $tracking_number, $id)
+    {
 
         if (isset($json->TrackPackagesResponse)) {
             $TrackPackagesResponse = $json->TrackPackagesResponse;
@@ -938,7 +944,7 @@ class everyMiute extends Command
                     $i = 0;
                     Detail::where('tracking_number', $tracking_number)->delete();
                     foreach ($scanEventList as $value) {
-                        if($value->status == ""){
+                        if ($value->status == "") {
                             $today = date("yy/m/d");
 
                             $form_data = array(
@@ -952,7 +958,7 @@ class everyMiute extends Command
                             );
 
                             $last_point = Detail::create($form_data);
-                        }else {
+                        } else {
 
                             $delivery_status = $this->mapping_fedex($value->statusCD);
 
@@ -1004,7 +1010,8 @@ class everyMiute extends Command
 
     }
 
-    public function call_ups($tracking_number){
+    public function call_ups($tracking_number)
+    {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -1027,7 +1034,8 @@ class everyMiute extends Command
         return $json;
     }
 
-    public function handling_ups($json, $tracking_number,  $id){
+    public function handling_ups($json, $tracking_number, $id)
+    {
         $shipment = $json->trackResponse->shipment;
 
         if (isset($shipment[0]->package)) {
@@ -1117,8 +1125,8 @@ class everyMiute extends Command
         var_dump("Approved = null");
 
 //        //Yun express=====================================================================
-//
-        $yunexpress = Tracking::select('id','tracking_number')->where('courier', '=', 'Yun Express')
+
+        $yunexpress = Tracking::select('id', 'tracking_number')->where('courier', '=', 'Yun Express')
             ->where('approved', '=', null)->get();
 
         foreach ($yunexpress as $value) {
@@ -1131,14 +1139,15 @@ class everyMiute extends Command
             $form_data = $this->handling_yun($json, $tracking_number, $id);
 
         }
-//////
-//////        //DHL=====================================================================
-//////
-        $dhl = Tracking::Where(function($query) {
+//
+//        //DHL=====================================================================
+//
+        $dhl = Tracking::Where(function ($query) {
             $query->where('courier', '=', 'DHL')
                 ->orwhere('courier', '=', 'DHL eCommerce');
         })
             ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
             ->select('id', 'tracking_number')->get();
 
         foreach ($dhl as $value) {
@@ -1156,6 +1165,7 @@ class everyMiute extends Command
 //
         $fedex = Tracking::where('courier', '=', 'Fedex')
             ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
             ->select('id', 'tracking_number')->get();
 
         foreach ($fedex as $value) {
@@ -1173,13 +1183,13 @@ class everyMiute extends Command
 ////////
 ////////        //USPS=====================================================================
 ////////
-        $usps = Tracking:: $usps = Tracking::
-        Where(function($query) {
+        $usps = Tracking::Where(function ($query) {
             $query->where('courier', '=', 'USPS')
-                ->orwhere('courier', '=', 'Epacket')
+                ->orwhere('courier', '=', 'ePacket')
                 ->orwhere('courier', '=', 'China Post');
         })
             ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
             ->select('id', 'tracking_number')->get();
 
         foreach ($usps as $value) {
@@ -1197,6 +1207,7 @@ class everyMiute extends Command
 //
         $ups = Tracking::where('courier', '=', 'UPS')
             ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
             ->select('id', 'tracking_number')->get();
 
         foreach ($ups as $value) {
@@ -1209,11 +1220,12 @@ class everyMiute extends Command
             $form_data = $this->handling_ups($json, $tracking_number, $id);
         }
 //
-//////        YANWEN===========================================
-////
+////////        YANWEN===========================================
+//////
         $yanwen = Tracking::where('courier', '=', 'YANWEN')
-        ->where('approved', '=', null)
-        ->select('id', 'tracking_number')->get();
+            ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
+            ->select('id', 'tracking_number')->get();
 
         foreach ($yanwen as $value) {
             $tracking_number = $value->tracking_number;

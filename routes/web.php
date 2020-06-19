@@ -27,6 +27,21 @@ Route::get('getpay_pal', 'PageController@getdata')->name('getpay_pal');
 
 Route::get('paypal_table', 'PageController@getPaypal_table')->name('paypal_table');
 
+Route::get('paypal_account',[
+   'as'=> 'paypal_account',
+   'uses' => 'PageController@GetPaypalAccount'
+]);
+
+Route::get('data_acconut',[
+   'as' => 'data_acconut',
+   'uses' => 'PageController@GetDataAccount'
+]);
+
+Route::post('add_account',[
+    'as' => 'add_account',
+    'uses' => 'PageController@AddAccount'
+]);
+
 Route::get('test', [
     'as' => 'test',
     'uses' => 'PageController@test'
@@ -64,6 +79,8 @@ Route::post('Detail_tracking', 'PageController@Detail');
 Route::resource('datatables', 'PageController');
 
 Route::POST('exportTracking', 'PageController@exportTracking');
+
+
 
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Model\Detail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -53,5 +54,24 @@ class UpdateDay extends Command
             var_dump('Error');
             throw new Exception($e->getMessage());
         }
+
+        //Chỉnh sửa đơn hàng 30 ngày không thêm tracking mới - Expired
+
+//        $Expired = Detail::select('id', 'process_date')->where('step_number', 0)->where('delivery_status', '<>', 5)->get();
+//
+//        foreach ($Expired as $value){
+//
+//            $today = strtotime(date("yy/m/d"));
+//            $first_date = strtotime($value->process_date);
+//            $datediff = abs($first_date - $today);
+//
+//
+//            if(floor($datediff / (60*60*24))>30){
+//                var_dump("expired");
+//                DB::table('detail')->where('id', $value->id)->update(['delivery_status' => 9]);
+//            }
+//        }
+
+
     }
 }
