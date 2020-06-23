@@ -47,7 +47,7 @@ Route::get('test', [
     'uses' => 'PageController@test'
 ]);
 
-Route::get('export', 'TrackingExport@export')->name('exportfile');
+Route::post('export', 'PageController@export');
 
 Route::post('import', 'PageController@import')->name('import');
 

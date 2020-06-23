@@ -592,6 +592,7 @@ dd($json);
             $TrackResponse = $json->TrackResponse;
             if (isset($TrackResponse->TrackInfo)) {
                 $TrackInfo = $TrackResponse->TrackInfo;
+//                var_dump($TrackInfo);
                 if (isset($TrackInfo->Error)) {
 
                     $Error = $TrackInfo->Error;
@@ -613,7 +614,9 @@ dd($json);
                 } elseif (isset($TrackInfo->TrackDetail)) {
 
                     $TrackDetail = $TrackInfo->TrackDetail;
+
                     if (is_array($TrackDetail) == true) {
+
                         $i = 0;
                         Detail::where('tracking_number', $tracking_number)->delete();
                         foreach ($TrackDetail as $value) {
@@ -639,7 +642,7 @@ dd($json);
                                 'step_number' => $i,
                                 'total_day' => floor($datediff / (60 * 60 * 24))
                             );
-
+dd(2);
                             var_dump($form_data);
 //                            $last_point = Detail::create($form_data);
 
@@ -678,11 +681,44 @@ dd($json);
                         }
                     } else {
 
-                        $check = Detail::where('tracking_number', $tracking_number)->get()->toArray();//Query dữ liệu
+                        $i = 0;
+                        Detail::where('tracking_number', $tracking_number)->delete();
 
-                        if (empty($check)) {
 
-                            $i = 0;
+                            $matches = $this->find_date($TrackDetail);
+
+                            $time = strtotime($matches);
+
+                            $newformat = date('yy/m/d', $time);//format day
+
+                            $today = strtotime(date("yy/m/d"));
+
+                            $datediff = abs($time - $today);
+
+                            $delivery_status = $this->mapping_usps($TrackDetail);//mapping delivery status
+
+                            $form_data = array(
+                                'tracking_id' => $id,
+                                'tracking_number' => $tracking_number,
+                                'process_content' => $TrackDetail,
+                                'process_date' => $newformat,
+                                'delivery_status' => $delivery_status,
+                                'step_number' => $i,
+                                'total_day' => floor($datediff / (60 * 60 * 24))
+                            );
+
+                            var_dump($form_data);
+//                            $last_point = Detail::create($form_data);
+
+                            $i++;
+                            //Log::channel('tracking_history')->info($response);
+
+
+//dd($TrackInfo->TrackSummary);
+                        if (isset($TrackInfo->TrackSummary)) {
+                            dd(4);
+                            Detail::where('tracking_number', $tracking_number)->where('step_number', 0)
+                                ->update(['step_number' => $i]);
 
                             $matches = $this->find_date($TrackInfo->TrackSummary);
 
@@ -699,15 +735,42 @@ dd($json);
                             $form_data = array(
                                 'tracking_id' => $id,
                                 'tracking_number' => $tracking_number,
-                                'process_content' => $TrackDetail,
-                                'step_number' => $i,
-                                'delivery_status' => $delivery_status,
+                                'process_content' => $TrackInfo->TrackSummary,
                                 'process_date' => $newformat,
+                                'delivery_status' => $delivery_status,
+                                'step_number' => 0,
                                 'total_day' => floor($datediff / (60 * 60 * 24))
                             );
-                            var_dump($form_data);
+//                        $check = Detail::where('tracking_number', $tracking_number)->get()->toArray();//Query dữ liệu
+//
+//                        if (empty($check)) {
+//
+//                            $i = 0;
+//
+//                            $matches = $this->find_date($TrackInfo->TrackSummary);
+//
+//                            $time = strtotime($matches);
+//
+//                            $newformat = date('yy/m/d', $time);
+//
+//                            $today = strtotime(date("yy/m/d"));
+//
+//                            $datediff = abs($time - $today);
+//
+//                            $delivery_status = $this->mapping_usps($TrackInfo->TrackSummary);
+//
+//                            $form_data = array(
+//                                'tracking_id' => $id,
+//                                'tracking_number' => $tracking_number,
+//                                'process_content' => $TrackDetail,
+//                                'step_number' => $i,
+//                                'delivery_status' => $delivery_status,
+//                                'process_date' => $newformat,
+//                                'total_day' => floor($datediff / (60 * 60 * 24))
+//                            );
+//                            var_dump($form_data);
 //                            $last_point = Detail::create($form_data);
-                            $i++;
+//                            $i++;
 //                            Detail::whereId($last_point->id)->update(['step_number' => 0]);
 
                             //Log::channel('tracking_history')->info($response);
@@ -746,6 +809,7 @@ dd($json);
                 }
             }
 //            Tracking::where('tracking_number', $tracking_number)->update(['approved' => 1]);
+            dd(1);
             var_dump('USPS complete');
         }
     }
@@ -777,7 +841,7 @@ dd($json);
 
     public function handling_yanwen($json, $tracking_number, $id)
     {
-//        dd($json);
+        dd($json);
         if ($json != null) {
             if ($json->result == null) {
 
@@ -1266,22 +1330,22 @@ function CallTracking(Request $request)
 //////
 //////        //DHL=====================================================================
 //////
-        $dhl = Tracking::
-        where('courier', '=', 'DHL')
-            ->orwhere('courier', '=', 'DHL eCommerce')
-            ->where('approved', '=', null)
-            ->select('id', 'tracking_number')->get();
-
-        foreach ($dhl as $value) {
-
-            $tracking_number = $value->tracking_number;
-            $id = $value->id;
-            var_dump($tracking_number);
-
-            $json = $this->call_dhl('9361269903504977073253');
-
-            $form_data = $this->handling_dhl($json, $tracking_number, $id);
-        }
+//        $dhl = Tracking::
+//        where('courier', '=', 'DHL')
+//            ->orwhere('courier', '=', 'DHL eCommerce')
+//            ->where('approved', '=', null)
+//            ->select('id', 'tracking_number')->get();
+//
+//        foreach ($dhl as $value) {
+//
+//            $tracking_number = $value->tracking_number;
+//            $id = $value->id;
+//            var_dump($tracking_number);
+//
+//            $json = $this->call_dhl('9361269903504977073253');
+//
+//            $form_data = $this->handling_dhl($json, $tracking_number, $id);
+//        }
 ////
 //////////        //Fedex=====================================================================
 //////
@@ -1303,21 +1367,21 @@ function CallTracking(Request $request)
 //////////
 //////////        //USPS=====================================================================
 //////////
-//        $usps = Tracking::where('courier', '=', 'USPS')
-////            ->orwhere('courier', '=', 'Epacket')->orwhere('courier', '=', 'China Post')
-//            ->where('approved', '=', null)
-//            ->select('id', 'tracking_number')->get();
-//
-//        foreach ($usps as $value) {
-//            $tracking_number = $value->tracking_number;
-//            $id = $value->id;
-//            var_dump($tracking_number);
-//
-//            $json = $this->call_usps($tracking_number);
-//
-//            $form_data = $this->handling_usps($json, $tracking_number, $id);
-//
-//        }
+        $usps = Tracking::where('courier', '=', 'USPS')
+//            ->orwhere('courier', '=', 'Epacket')->orwhere('courier', '=', 'China Post')
+            ->where('approved', '=', null)
+            ->select('id', 'tracking_number')->get();
+
+        foreach ($usps as $value) {
+            $tracking_number = $value->tracking_number;
+            $id = $value->id;
+            var_dump($tracking_number);
+
+            $json = $this->call_usps('4208521392748927005303010062529516');
+
+            $form_data = $this->handling_usps($json, $tracking_number, $id);
+
+        }
 ////
 ////////        UPS==========================================================
 ////
@@ -1372,18 +1436,18 @@ function CallTracking(Request $request)
 //
 //    }
 
-    $ibeđing = Tracking::select('order_id')->where('supplier', 'Tony')
-        ->where('tracking_number', null)->get();
-
-    foreach ($ibeđing as $value) {
-
-        $order_id = $value->order_id;
-        var_dump($order_id);
-
-        $json = $this->call_ibedding('607207');
-
-        $form_data = $this->handling_ibedding($json, $order_id);
-    }
+//    $ibeđing = Tracking::select('order_id')->where('supplier', 'Tony')
+//        ->where('tracking_number', null)->get();
+//
+//    foreach ($ibeđing as $value) {
+//
+//        $order_id = $value->order_id;
+//        var_dump($order_id);
+//
+//        $json = $this->call_ibedding('607207');
+//
+//        $form_data = $this->handling_ibedding($json, $order_id);
+//    }
 
 }
 }

@@ -200,17 +200,19 @@ class everyMiute extends Command
         if ($string == null) {
             $delivery_status = 10;
 
-        } elseif (preg_match('/\bOut for Delivery\b/', $string) == true) {
+        } elseif (preg_match('/Out for Delivery/', $string) == true) {
 
             $delivery_status = 3;
 
-        } elseif (preg_match('/\bReminder to Schedule Redelivery\b/', $string) == true) {
+        } elseif (preg_match('/Reminder to Schedule Redelivery/', $string) == true) {
             $delivery_status = 4;
 
-        } elseif (preg_match('/\bYour item was delivered\b/', $string) == true) {
+        } elseif (preg_match('/Your item was delivered/', $string) == true) {
             $delivery_status = 5;
 
-        } elseif ((preg_match('/\bAvailable for Pickup\b/', $string) == true)) {
+        } elseif (preg_match('/delivered/', $string) == true) {
+            $delivery_status = 5;
+        } elseif ((preg_match('/Available for Pickup/', $string) == true)) {
             $delivery_status = 3;
         } else {
             $delivery_status = 2;
@@ -218,6 +220,7 @@ class everyMiute extends Command
         return $delivery_status;
 
     }
+
 
     public function mapping_dhl($statusCode, $status)
     {
@@ -231,11 +234,11 @@ class everyMiute extends Command
             $delivery_status = 1;
         } elseif ($statusCode == 'transit' && $status == 'Out for Delivery') {
             $delivery_status = 3;
-        } elseif ($statusCode == 'transit' && $status == 'PROCESSED THROUGH SORT FACILITY'
-            || $status == 'RESCHEDULED'
+        } elseif ($status == 'RESCHEDULED'
             || $status == 'FORWARDED') {
             $delivery_status = 4;
-
+        } elseif ($statusCode == 'transit' && $status == 'PROCESSED THROUGH SORT FACILITY') {
+            $delivery_status = 2;
         } elseif ($statusCode == 'failure') {
             $delivery_status = 4;
         } elseif ($statusCode == 'delivered') {
@@ -260,7 +263,7 @@ class everyMiute extends Command
 
         } elseif ($TrackingStatus == 50) {
             $delivery_status = 5;
-        } elseif ($TrackingStatus == 90 || (preg_match('/\bReturning package to shipper\b/', $ProcessContent)) == true) {
+        } elseif ($TrackingStatus == 90 || (preg_match('/Returning package to shipper/', $ProcessContent)) == true) {
             $delivery_status = 4;
         } else {
             $delivery_status = 2;
@@ -301,7 +304,7 @@ class everyMiute extends Command
 
         if ($type == 'M' || $type == 'P') {
             $delivery_status = 1;
-        } else if ($type == 'I' && (preg_match('/\bReminder to Schedule Redelivery\b/', $description)) == true) {
+        } else if ($type == 'I' && (preg_match('/Reminder to Schedule Redelivery/', $description)) == true) {
             $delivery_status = 3;
         } elseif ($type == 'I') {
             $delivery_status = 1;
@@ -323,14 +326,14 @@ class everyMiute extends Command
 
         if ($tracking_status == 'PU10') {
             $delivery_status = 1;
-        } elseif ($tracking_status == 'OTHER' && (preg_match('/\bOut for Delivery\b/', $message)) == true) {
+        } elseif ($tracking_status == 'OTHER' && (preg_match('/Out for Delivery/', $message)) == true) {
             $delivery_status = 3;
-        } elseif ((preg_match('/\bOut for Delivery\b/', $message)) == true) {
+        } elseif ((preg_match('/Out for Delivery/', $message)) == true) {
             $delivery_status = 3;
         } elseif ($tracking_status == 'LM50' || $message == 'Delivered') {
             $delivery_status = 5;
-        } elseif ((preg_match('/\bReturning package to shipper\b/', $message)) == true
-            || (preg_match('/\bATTEMPTED\b/', $message)) == true) {
+        } elseif ((preg_match('/Returning package to shipper/', $message)) == true
+            || (preg_match('/ATTEMPTED/', $message)) == true) {
             $delivery_status = 4;
         } else {
             $delivery_status = 2;
@@ -708,11 +711,38 @@ class everyMiute extends Command
                         }
                     } else {
 
-                        $check = Detail::where('tracking_number', $tracking_number)->get()->toArray();//Query dữ liệu
+                        $i = 0;
+                        Detail::where('tracking_number', $tracking_number)->delete();
 
-                        if (empty($check)) {
 
-                            $i = 0;
+                        $matches = $this->find_date($TrackDetail);
+
+                        $time = strtotime($matches);
+
+                        $newformat = date('yy/m/d', $time);//format day
+
+                        $today = strtotime(date("yy/m/d"));
+
+                        $datediff = abs($time - $today);
+
+                        $delivery_status = $this->mapping_usps($TrackDetail);//mapping delivery status
+
+                        $form_data = array(
+                            'tracking_id' => $id,
+                            'tracking_number' => $tracking_number,
+                            'process_content' => $TrackDetail,
+                            'process_date' => $newformat,
+                            'delivery_status' => $delivery_status,
+                            'step_number' => $i,
+                            'total_day' => floor($datediff / (60 * 60 * 24))
+                        );
+                        $last_point = Detail::create($form_data);
+                        $i++;
+
+                        if (isset($TrackInfo->TrackSummary)) {
+
+                            Detail::where('tracking_number', $tracking_number)->where('step_number', 0)
+                                ->update(['step_number' => $i]);
 
                             $matches = $this->find_date($TrackInfo->TrackSummary);
 
@@ -729,18 +759,13 @@ class everyMiute extends Command
                             $form_data = array(
                                 'tracking_id' => $id,
                                 'tracking_number' => $tracking_number,
-                                'process_content' => $TrackDetail,
-                                'step_number' => $i,
-                                'delivery_status' => $delivery_status,
+                                'process_content' => $TrackInfo->TrackSummary,
                                 'process_date' => $newformat,
+                                'delivery_status' => $delivery_status,
+                                'step_number' => 0,
                                 'total_day' => floor($datediff / (60 * 60 * 24))
                             );
-
                             $last_point = Detail::create($form_data);
-                            $i++;
-                            Detail::whereId($last_point->id)->update(['step_number' => 0]);
-
-                            //Log::channel('tracking_history')->info($response);
                         }
 
                     }
@@ -1120,69 +1145,69 @@ class everyMiute extends Command
     public
     function handle()
     {
+
+//        DB::table('tracking')->where('approved', '=', 1)->update(['approved' => null]);
+//        var_dump("Approved = null");
 //
-        DB::table('tracking')->where('approved', '=', 1)->update(['approved'=>null]);
-        var_dump("Approved = null");
-
-//        //Yun express=====================================================================
-
-        $yunexpress = Tracking::select('id', 'tracking_number')->where('courier', '=', 'Yun Express')
-            ->where('approved', '=', null)->get();
-
-        foreach ($yunexpress as $value) {
-            $tracking_number = $value->tracking_number;
-            $id = $value->id;
-            var_dump($tracking_number);
-
-            $json = $this->call_yun($tracking_number);
-
-            $form_data = $this->handling_yun($json, $tracking_number, $id);
-
-        }
+////        Yun express=====================================================================
 //
-//        //DHL=====================================================================
+//        $yunexpress = Tracking::select('id', 'tracking_number')->where('courier', '=', 'Yun Express')
+//            ->where('approved', '=', null)->get();
 //
-        $dhl = Tracking::Where(function ($query) {
-            $query->where('courier', '=', 'DHL')
-                ->orwhere('courier', '=', 'DHL eCommerce');
-        })
-            ->where('approved', '=', null)
-            ->where('tracking_number', '<>', null)
-            ->select('id', 'tracking_number')->get();
-
-        foreach ($dhl as $value) {
-
-            $tracking_number = $value->tracking_number;
-            $id = $value->id;
-            var_dump($tracking_number);
-
-            $json = $this->call_dhl($tracking_number);
-
-            $form_data = $this->handling_dhl($json, $tracking_number, $id);
-        }
-
-//////        //Fedex=====================================================================
+//        foreach ($yunexpress as $value) {
+//            $tracking_number = $value->tracking_number;
+//            $id = $value->id;
+//            var_dump($tracking_number);
 //
-        $fedex = Tracking::where('courier', '=', 'Fedex')
-            ->where('approved', '=', null)
-            ->where('tracking_number', '<>', null)
-            ->select('id', 'tracking_number')->get();
+//            $json = $this->call_yun($tracking_number);
+//
+//            $form_data = $this->handling_yun($json, $tracking_number, $id);
+//
+//        }
 
-        foreach ($fedex as $value) {
+//        DHL=====================================================================
 
-            $tracking_number = $value->tracking_number;
-            $id = $value->id;
-            var_dump($tracking_number);
-
-            $json = $this->call_fedex($tracking_number);
-
-            $form_data = $this->handling_fedex($json, $tracking_number, $id);
-
-        }
+//        $dhl = Tracking::Where(function ($query) {
+//            $query->where('courier', '=', 'DHL')
+//                ->orwhere('courier', '=', 'DHL eCommerce');
+//        })
+//            ->where('approved', '=', null)
+//            ->where('tracking_number', '<>', null)
+//            ->select('id', 'tracking_number')->get();
+//
+//        foreach ($dhl as $value) {
+//
+//            $tracking_number = $value->tracking_number;
+//            $id = $value->id;
+//            var_dump($tracking_number);
+//
+//            $json = $this->call_dhl($tracking_number);
+//
+//            $form_data = $this->handling_dhl($json, $tracking_number, $id);
+//        }
+//
+//        //Fedex=====================================================================
+//
+//        $fedex = Tracking::where('courier', '=', 'Fedex')
+//            ->where('approved', '=', null)
+//            ->where('tracking_number', '<>', null)
+//            ->select('id', 'tracking_number')->get();
+//
+//        foreach ($fedex as $value) {
+//
+//            $tracking_number = $value->tracking_number;
+//            $id = $value->id;
+//            var_dump($tracking_number);
+//
+//            $json = $this->call_fedex($tracking_number);
+//
+//            $form_data = $this->handling_fedex($json, $tracking_number, $id);
+//
+//        }
+//
+//
+////        //USPS=====================================================================
 ////
-////////
-////////        //USPS=====================================================================
-////////
         $usps = Tracking::Where(function ($query) {
             $query->where('courier', '=', 'USPS')
                 ->orwhere('courier', '=', 'ePacket')
@@ -1202,41 +1227,41 @@ class everyMiute extends Command
             $form_data = $this->handling_usps($json, $tracking_number, $id);
 
         }
+//
+//////        UPS==========================================================
+//
+//        $ups = Tracking::where('courier', '=', 'UPS')
+//            ->where('approved', '=', null)
+//            ->where('tracking_number', '<>', null)
+//            ->select('id', 'tracking_number')->get();
+//
+//        foreach ($ups as $value) {
+//            $tracking_number = $value->tracking_number;
+//            $id = $value->id;
+//            var_dump($tracking_number);
+//
+//            $json = $this->call_ups($tracking_number);
+//
+//            $form_data = $this->handling_ups($json, $tracking_number, $id);
+//        }
 ////
-////////        UPS==========================================================
+////        YANWEN===========================================
 //
-        $ups = Tracking::where('courier', '=', 'UPS')
-            ->where('approved', '=', null)
-            ->where('tracking_number', '<>', null)
-            ->select('id', 'tracking_number')->get();
-
-        foreach ($ups as $value) {
-            $tracking_number = $value->tracking_number;
-            $id = $value->id;
-            var_dump($tracking_number);
-
-            $json = $this->call_ups($tracking_number);
-
-            $form_data = $this->handling_ups($json, $tracking_number, $id);
-        }
+//        $yanwen = Tracking::where('courier', '=', 'YANWEN')
+//            ->where('approved', '=', null)
+//            ->where('tracking_number', '<>', null)
+//            ->select('id', 'tracking_number')->get();
 //
-////////        YANWEN===========================================
-//////
-        $yanwen = Tracking::where('courier', '=', 'YANWEN')
-            ->where('approved', '=', null)
-            ->where('tracking_number', '<>', null)
-            ->select('id', 'tracking_number')->get();
-
-        foreach ($yanwen as $value) {
-            $tracking_number = $value->tracking_number;
-            $id = $value->id;
-            var_dump($tracking_number);
-
-            $json = $this->call_yanwen($tracking_number);
-
-            $form_data = $this->handling_yanwen($json, $tracking_number, $id);
-
-        }
+//        foreach ($yanwen as $value) {
+//            $tracking_number = $value->tracking_number;
+//            $id = $value->id;
+//            var_dump($tracking_number);
+//
+//            $json = $this->call_yanwen($tracking_number);
+//
+//            $form_data = $this->handling_yanwen($json, $tracking_number, $id);
+//
+//        }
     }
 
 }

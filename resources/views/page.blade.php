@@ -89,14 +89,20 @@
             <div class="row mb-8">
                 <div class="col-lg-2" id="filter_col7" data-column="6">
                     <label>Supplier:</label>
-                    <input type="text" class="form-control col-lg-12 column_filter" id="col6_filter" name="status"/>
+                    <select class="form-control col-lg-12 column_filter" id="col6_filter">
+                        <option></option>
+                        <option value="null">Blank</option>
+                        @foreach($list_supplier as $value)
+                            <option>{{$value->name}}</option>
+                        @endforeach
+                    </select>
+{{--                    <input type="text" class="form-control col-lg-12 column_filter" id="col6_filter"/>--}}
                 </div>
                 <div class="col-lg-2" id="filter_col8" data-column="7">
                     <label>Status:</label>
                     {{--                    <input type="text" class="form-control col-lg-12 column_filter" id="col7_filter"--}}
                     {{--                           name="process_content"/>--}}
-                    <select class="form-control col-lg-12 column_filter" id="col7_filter"
-                            name="process_content">
+                    <select class="form-control col-lg-12 column_filter" id="col7_filter">
                         <option selected></option>
                         <option>Info Received</option>
                         <option>In Transit</option>
@@ -116,15 +122,21 @@
                 </div>
                 <div class="col-lg-2" id="filter_col10" data-column="9">
                     <label>Process date:</label>
-                    <input type="date" class="form-control col-lg-12 column_filter" id="col9_filter" name="total_day"/>
+                    <input type="date" class="form-control col-lg-12 column_filter" id="col9_filter"/>
                 </div>
                 <div class="col-lg-2" id="filter_col11" data-column="10">
                     <label>Total day:</label>
-                    <input type="text" class="form-control col-lg-12 column_filter" id="col10_filter" name="note"/>
+                    <select class="form-control col-lg-12 column_filter" id="col10_filter">
+                        <option></option>
+                        @foreach($list_total_day as $value)
+                            <option value="{{$value->total_day}}">{{$value->total_day}}</option>
+                        @endforeach
+                    </select>
+{{--                    <input type="text" class="form-control col-lg-12 column_filter" id="col10_filter"/>--}}
                 </div>
                 <div class="col-lg-2" id="filter_col11" data-column="11">
                     <label>Note:</label>
-                    <input type="text" class="form-control col-lg-12 column_filter" id="col11_filter" name="note"/>
+                    <input type="text" class="form-control col-lg-12 column_filter" id="col11_filter"/>
                 </div>
             </div>
         </form>
@@ -368,10 +380,40 @@
                             <div class="form-group">
                                 <label>Supplier</label>
                                 <select name="export_supplier" class="form-control">
-                                    <option></option>
+                                    <option value="null">All</option>
                                     @foreach($list_supplier as $value)
                                         <option value="{{$value->name}}">{{$value->name}}</option>
                                     @endforeach
+                                </select>
+                                {{--                                <input type="text" name="export_supplier" class="form-control">--}}
+                            </div>
+                            <div class="form-group">
+                                <label>Courier</label>
+                                <select name="export_courier" class="form-control">
+                                    <option value="null">All</option>
+                                    <option>DHL</option>
+                                    <option>Yun Express</option>
+                                    <option>USPS</option>
+                                    <option>Epacket</option>
+                                    <option>UPS</option>
+                                    <option>Fedex</option>
+                                    <option>Yanwen</option>
+                                </select>
+                                {{--                                <input type="text" name="export_supplier" class="form-control">--}}
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select name="export_status" class="form-control">
+                                    <option value="null">All</option>
+                                    <option>Info Received</option>
+                                    <option>In Transit</option>
+                                    <option>Out for Delivery</option>
+                                    <option>Delivered</option>
+                                    <option>Failed Attempt</option>
+                                    <option>Available for Pickup</option>
+                                    <option>Alert</option>
+                                    <option>Expired</option>
+                                    <option>Pending</option>
                                 </select>
                                 {{--                                <input type="text" name="export_supplier" class="form-control">--}}
                             </div>
@@ -507,7 +549,7 @@
         $(document).ready(function () {
             $('#myTable').DataTable({
                 dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row'<'col-sm-12'B>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
-                buttons: ["colvis",
+                buttons: ["colvis"
                 ],
                 serverSide: true,
                 ajax: {
@@ -611,6 +653,42 @@
                     'to_date': $('input[name=export_todate]').val(),
                     'from_date': $('input[name=export_fromdate]').val(),
                     'supplier': $('select[name=export_supplier]').val(),
+                    'courier': $('select[name=export_courier]').val(),
+                    'status': $('select[name=export_status]').val(),
+                },
+                success: function (data) {
+                    console.log(data);
+                    if ((data.errors)) {
+                        $('error1').removeClass('hidden');
+                        $('error2').removeClass('hidden');
+                        $('.error1').text(data.errors.to_date);
+                        $('.error2').text(data.errors.from_date);
+                    } else {
+                        const workbook = XLSX.utils.book_new();
+                        const myHeader = [];
+                        const worksheet = XLSX.utils.json_to_sheet(data, {header: myHeader});
+
+                        const range = XLSX.utils.decode_range(worksheet['!ref']);
+                        range.e['c'] = myHeader.length - 1;
+                        worksheet['!ref'] = XLSX.utils.encode_range(range);
+
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'Tracking');
+                        XLSX.writeFile(workbook, 'Tracking.xlsx');
+                    }
+                }
+            });
+
+        });
+    </script>
+
+    <script type="text/javascript">
+
+        $("#export-file").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: 'export',
+                data: {
+                    '_token': $('input[name=_token]').val(),
                 },
                 success: function (data) {
                     console.log(data);

@@ -16,7 +16,14 @@
                 </div>
                 <div class="col-lg-2" id="filter_col3" data-column="2">
                     <label>Paypal account:</label>
-                    <input type="text" class="form-control col-lg-12 column_filter" id="col2_filter">
+                    <select class="form-control col-lg-12 column_filter" id="col2_filter">
+                        <option></option>
+                        <option value="null">Blank</option>
+                        @foreach($list_paypal_account as $value)
+                            <option>{{$value->paypal_account}}</option>
+                        @endforeach
+                    </select>
+{{--                    <input type="text" class="form-control col-lg-12 column_filter" id="col2_filter">--}}
                 </div>
                 <div class="col-lg-2" id="filter_col4" data-column="3">
                     <label>Transaction Id:</label>
@@ -52,7 +59,7 @@
                     <label>Tracking status:</label>
 {{--                    <input type="text" class="form-control col-lg-12 column_filter" id="col7_filter"/>--}}
                     <select class="form-control col-lg-12 column_filter" id="col7_filter">
-                        <option selected></option>
+                        <option></option>
                         <option>Info Received</option>
                         <option>In Transit</option>
                         <option>Out for Delivery</option>
@@ -66,7 +73,14 @@
                 </div>
                 <div class="col-lg-2" id="filter_col9" data-column="8">
                     <label>Update:</label>
-                    <input type="text" class="form-control col-lg-12 column_filter" id="col8_filter"/>
+                    <select class="form-control col-lg-12 column_filter" id="col8_filter">
+                        <option ></option>
+                        <option value="null">Blank</option>
+                        <option>Updated</option>
+                        <option>Added</option>
+                        <option>Error</option>
+                    </select>
+{{--                    <input type="text" class="form-control col-lg-12 column_filter" id="col8_filter"/>--}}
                 </div>
             </div>
         </form>
@@ -150,22 +164,13 @@
                             <input type="text" class="form-control" id="tracking_number_detail" disabled>
                         </div>
                     </div>
-                    <table class="table table-bordered table-checkable">
-                        <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Detail</th>
-                        </tr>
-                        </thead>
-                        <tbody class="trackingdetail">
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <ul class="timeline trackingdetail">
+                        <li id="">
+                            <a target="_blank" href="https://www.totoprayogo.com/#">New Web Design</a>
+                            <a href="#" class="float-right">21 March, 2014</a>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque scelerisque diam non nisi semper, et elementum lorem ornare. Maecenas placerat facilisis mollis. Duis sagittis ligula in sodales vehicula....</p>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -490,4 +495,39 @@
             filterColumn($(this).parents('div').attr('data-column'));
         });
     </script>
+
+    <script type="text/javascript">
+
+        $("#export-file").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: 'export',
+                data: {
+                    '_token': $('input[name=_token]').val(),
+                },
+                success: function (data) {
+                    console.log(data);
+                    if ((data.errors)) {
+                        $('error1').removeClass('hidden');
+                        $('error2').removeClass('hidden');
+                        $('.error1').text(data.errors.to_date);
+                        $('.error2').text(data.errors.from_date);
+                    } else {
+                        const workbook = XLSX.utils.book_new();
+                        const myHeader = [];
+                        const worksheet = XLSX.utils.json_to_sheet(data, {header: myHeader});
+
+                        const range = XLSX.utils.decode_range(worksheet['!ref']);
+                        range.e['c'] = myHeader.length - 1;
+                        worksheet['!ref'] = XLSX.utils.encode_range(range);
+
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'Tracking');
+                        XLSX.writeFile(workbook, 'Tracking.xlsx');
+                    }
+                }
+            });
+
+        });
+    </script>
+
 @endsection

@@ -89,25 +89,9 @@
         <!--end::Dropdown-->
         <!--begin::Button-->
         <!-- document.getElementById('BtnUpload').click(); -->
-
-        <form>
-
-
-        </form>
-
-        {{-- thanhtee --}}
-        {{-- <form action="{{route('import')}}" method="post" enctype="multipart/form-data">@csrf
-            <input id="uploadImg" style="display: none" type="file" name="files">
-            <button type="button" id="check_file" class="btn btn-primary">Select Files</button>
-            <button type="button" id="cancelBtn" class="btn btn-default CancelButton">cancel</button>
-        </form> --}}
         <form class="d-flex align-items-center" action="{{route('import')}}" method="post"
               enctype="multipart/form-data">@csrf
-            <input id="uploadImg" style="display: none" type="file" name="files">
-            {{--                                        <button type="button" id="check_file" class="btn btn-primary">Select Files</button>--}}
-            <button type="button" id="check_file" class="square btn btn-outline-primary "><i
-                    class="fa fa-folder-open icon text-btnex d-flex align-items-center justify-content-center">Open
-                    file</i></button>
+            <input type="file" name="files">
             <button type="submit" id="upload_file_start" class="square btn btn-outline-primary "><i
                     class="fa fa-rocket icon text-btnex d-flex align-items-center justify-content-center">Upfile</i>
             </button>
@@ -140,28 +124,10 @@
                 })
             });
         </script>
-        {{--                                    <script>--}}
-
-        {{--                                        $(function() {--}}
-        {{--                                            $("#check_file").on("click", function() {--}}
-        {{--                                                $("#UploadFile").click();--}}
-        {{--                                                $("#BtnImport").click(--}}
-        {{--                                                    console.log('Import Roi Nhe 😀')--}}
-        {{--                                                );--}}
-        {{--                                            });--}}
-
-        {{--                                        });--}}
-
-        {{--                                    </script>--}}
-        {{--                                    <form action="{{route('exportfile')}}" method="get" enctype="multipart/form-data" >@csrf--}}
-        {{--                                        <button type="submit" class="btn-success form-control" name="call">Export Tracking</button>--}}
-        {{--                                    </form>--}}
-
-        {{-- button export --}}
-        <form action="{{route('exportfile')}}" method="get" enctype="multipart/form-data">@csrf
-            <button type="submit" class="square btn btn-outline-primary " name="call"><i
+        <form>
+            <a  id="export-file" class="square btn btn-outline-primary"><i
                     class="fa fa-file-excel-o icon-md text-btnex d-flex align-items-center justify-content-center font-action">Expport</i>
-            </button>
+            </a>
         </form>
 
         <form>
@@ -170,13 +136,6 @@
                 <i class="fa fa-cubes icon-md text-btnex d-flex align-items-center justify-content-center font-action">Op.export</i>
             </a>
         </form>
-
-        <form>
-            <a class="square add-account-modal btn btn-secondary btn-outline-success" data-toggle="modal"
-               data-target="#add-account-modal">
-                <i class="fa fa-accusoft icon-md text-hover-success d-flex align-items-center justify-content-center font-action">Add.Account</i></a>
-        </form>
-
 
     </div>
 </div>

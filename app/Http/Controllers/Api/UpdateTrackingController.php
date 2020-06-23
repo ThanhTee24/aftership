@@ -175,17 +175,19 @@ class UpdateTrackingController extends Controller
         if ($string == null) {
             $delivery_status = 10;
 
-        } elseif (preg_match('/\bOut for Delivery\b/', $string) == true) {
+        } elseif (preg_match('/Out for Delivery/', $string) == true) {
 
             $delivery_status = 3;
 
-        } elseif (preg_match('/\bReminder to Schedule Redelivery\b/', $string) == true) {
+        } elseif (preg_match('/Reminder to Schedule Redelivery/', $string) == true) {
             $delivery_status = 4;
 
-        } elseif (preg_match('/\bYour item was delivered\b/', $string) == true) {
+        } elseif (preg_match('/Your item was delivered/', $string) == true) {
             $delivery_status = 5;
 
-        } elseif ((preg_match('/\bAvailable for Pickup\b/', $string) == true)) {
+        } elseif (preg_match('/delivered/', $string) == true) {
+            $delivery_status = 5;
+        } elseif ((preg_match('/Available for Pickup/', $string) == true)) {
             $delivery_status = 3;
         } else {
             $delivery_status = 2;
@@ -235,7 +237,7 @@ class UpdateTrackingController extends Controller
 
         } elseif ($TrackingStatus == 50) {
             $delivery_status = 5;
-        } elseif ($TrackingStatus == 90 || (preg_match('/\bReturning package to shipper\b/', $ProcessContent)) == true) {
+        } elseif ($TrackingStatus == 90 || (preg_match('/Returning package to shipper/', $ProcessContent)) == true) {
             $delivery_status = 4;
         } else {
             $delivery_status = 2;
@@ -276,7 +278,7 @@ class UpdateTrackingController extends Controller
 
         if ($type == 'M' || $type == 'P') {
             $delivery_status = 1;
-        } else if ($type == 'I' && (preg_match('/\bReminder to Schedule Redelivery\b/', $description)) == true) {
+        } else if ($type == 'I' && (preg_match('/Reminder to Schedule Redelivery/', $description)) == true) {
             $delivery_status = 3;
         } elseif ($type == 'I') {
             $delivery_status = 1;
@@ -298,14 +300,14 @@ class UpdateTrackingController extends Controller
 
         if ($tracking_status == 'PU10') {
             $delivery_status = 1;
-        } elseif ($tracking_status == 'OTHER' && (preg_match('/\bOut for Delivery\b/', $message)) == true) {
+        } elseif ($tracking_status == 'OTHER' && (preg_match('/Out for Delivery/', $message)) == true) {
             $delivery_status = 3;
-        } elseif ((preg_match('/\bOut for Delivery\b/', $message)) == true) {
+        } elseif ((preg_match('/Out for Delivery/', $message)) == true) {
             $delivery_status = 3;
         } elseif ($tracking_status == 'LM50' || $message == 'Delivered') {
             $delivery_status = 5;
-        } elseif ((preg_match('/\bReturning package to shipper\b/', $message)) == true
-            || (preg_match('/\bATTEMPTED\b/', $message)) == true) {
+        } elseif ((preg_match('/Returning package to shipper/', $message)) == true
+            || (preg_match('/ATTEMPTED/', $message)) == true) {
             $delivery_status = 4;
         } else {
             $delivery_status = 2;
@@ -566,7 +568,8 @@ class UpdateTrackingController extends Controller
         }
     }
 
-    public function call_usps($tracking_number){
+    public function call_usps($tracking_number)
+    {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -590,7 +593,9 @@ class UpdateTrackingController extends Controller
         return $json;
     }
 
-    public function handling_usps($json, $tracking_number, $id){
+    public function handling_usps($json, $tracking_number, $id)
+    {
+
         if (isset($json->TrackResponse)) {
 
             $TrackResponse = $json->TrackResponse;
@@ -617,6 +622,7 @@ class UpdateTrackingController extends Controller
 
                     $TrackDetail = $TrackInfo->TrackDetail;
                     if (is_array($TrackDetail) == true) {
+
                         $i = 0;
                         Detail::where('tracking_number', $tracking_number)->delete();
                         foreach ($TrackDetail as $value) {
@@ -680,11 +686,38 @@ class UpdateTrackingController extends Controller
                         }
                     } else {
 
-                        $check = Detail::where('tracking_number', $tracking_number)->get()->toArray();//Query dữ liệu
+                        $i = 0;
+                        Detail::where('tracking_number', $tracking_number)->delete();
 
-                        if (empty($check)) {
+                        $matches = $this->find_date($TrackDetail);
 
-                            $i = 0;
+                        $time = strtotime($matches);
+
+                        $newformat = date('yy/m/d', $time);//format day
+
+                        $today = strtotime(date("yy/m/d"));
+
+                        $datediff = abs($time - $today);
+
+                        $delivery_status = $this->mapping_usps($TrackDetail);//mapping delivery status
+
+                        $form_data = array(
+                            'tracking_id' => $id,
+                            'tracking_number' => $tracking_number,
+                            'process_content' => $TrackDetail,
+                            'process_date' => $newformat,
+                            'delivery_status' => $delivery_status,
+                            'step_number' => $i,
+                            'total_day' => floor($datediff / (60 * 60 * 24))
+                        );
+
+                        $last_point = Detail::create($form_data);
+                        $i++;
+
+                        if (isset($TrackInfo->TrackSummary)) {
+
+                            Detail::where('tracking_number', $tracking_number)->where('step_number', 0)
+                                ->update(['step_number' => $i]);
 
                             $matches = $this->find_date($TrackInfo->TrackSummary);
 
@@ -701,18 +734,14 @@ class UpdateTrackingController extends Controller
                             $form_data = array(
                                 'tracking_id' => $id,
                                 'tracking_number' => $tracking_number,
-                                'process_content' => $TrackDetail,
-                                'step_number' => $i,
-                                'delivery_status' => $delivery_status,
+                                'process_content' => $TrackInfo->TrackSummary,
                                 'process_date' => $newformat,
+                                'delivery_status' => $delivery_status,
+                                'step_number' => 0,
                                 'total_day' => floor($datediff / (60 * 60 * 24))
                             );
-
                             $last_point = Detail::create($form_data);
-                            $i++;
-                            Detail::whereId($last_point->id)->update(['step_number' => 0]);
 
-                            //Log::channel('tracking_history')->info($response);
                         }
 
                     }
@@ -751,12 +780,13 @@ class UpdateTrackingController extends Controller
         }
     }
 
-    public function call_yanwen($tracking_number){
+    public function call_yanwen($tracking_number)
+    {
 
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "http://shipping.esrax.com/yw/?trackingnumber=". $tracking_number,
+            CURLOPT_URL => "http://shipping.esrax.com/yw/?trackingnumber=" . $tracking_number,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -775,7 +805,8 @@ class UpdateTrackingController extends Controller
         return $json;
     }
 
-    public function handling_yanwen($json, $tracking_number, $id){
+    public function handling_yanwen($json, $tracking_number, $id)
+    {
         if ($json != null) {
             if ($json->result == null) {
 
@@ -878,7 +909,8 @@ class UpdateTrackingController extends Controller
         }
     }
 
-    public function call_fedex($tracking_number){
+    public function call_fedex($tracking_number)
+    {
 
         $curl = curl_init();
 
@@ -901,7 +933,8 @@ class UpdateTrackingController extends Controller
         return $json;
     }
 
-    public function handling_fedex($json, $tracking_number, $id){
+    public function handling_fedex($json, $tracking_number, $id)
+    {
 
         if (isset($json->TrackPackagesResponse)) {
             $TrackPackagesResponse = $json->TrackPackagesResponse;
@@ -912,7 +945,7 @@ class UpdateTrackingController extends Controller
                     $i = 0;
                     Detail::where('tracking_number', $tracking_number)->delete();
                     foreach ($scanEventList as $value) {
-                        if($value->status == ""){
+                        if ($value->status == "") {
                             $today = date("yy/m/d");
 
                             $form_data = array(
@@ -926,7 +959,7 @@ class UpdateTrackingController extends Controller
                             );
 
                             $last_point = Detail::create($form_data);
-                        }else {
+                        } else {
 
                             $delivery_status = $this->mapping_fedex($value->statusCD);
 
@@ -978,7 +1011,8 @@ class UpdateTrackingController extends Controller
 
     }
 
-    public function call_ups($tracking_number){
+    public function call_ups($tracking_number)
+    {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -1001,7 +1035,8 @@ class UpdateTrackingController extends Controller
         return $json;
     }
 
-    public function handling_ups($json, $tracking_number,  $id){
+    public function handling_ups($json, $tracking_number, $id)
+    {
         $shipment = $json->trackResponse->shipment;
 
         if (isset($shipment[0]->package)) {
@@ -1114,13 +1149,13 @@ class UpdateTrackingController extends Controller
 
             $form_data = $this->handling_usps($json, $tracking_number, $id);
 
-        }elseif ($request->courier == 'UPS'){
+        } elseif ($request->courier == 'UPS') {
 
             $json = $this->call_ups($tracking_number);
 
             $form_data = $this->handling_ups($json, $tracking_number, $id);
 
-        }elseif ($request->courier == 'YANWEN'){
+        } elseif ($request->courier == 'YANWEN') {
 
             $json = $this->call_yanwen($tracking_number);
 

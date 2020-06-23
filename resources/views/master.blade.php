@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css?family=Comfortaa:300,400,700" rel="stylesheet">
 
     <!-- Sidemenu Css -->
-    <link href="assets/plugins/toggle-sidebar/sidemenu.css" rel="stylesheet"/>
+{{--    <link href="assets/plugins/toggle-sidebar/sidemenu.css" rel="stylesheet"/>--}}
 
     <!--begin::Fonts-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
@@ -35,7 +35,7 @@
     {{-- <link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"/> --}}
     <script type="text/javascript" src="assets/vendor/sheetjs/shim.min.js"></script>
     <script type="text/javascript" src="assets/vendor/sheetjs/xlsx.full.min.js"></script>
-    <script type="text/javascript" src="assets/vendor/blob/Blob.min.js"></script>
+{{--    <script type="text/javascript" src="assets/vendor/blob/Blob.min.js"></script>--}}
     <script type="text/javascript" src="assets/vendor/file-saver/FileSaver.min.js"></script>
 
 

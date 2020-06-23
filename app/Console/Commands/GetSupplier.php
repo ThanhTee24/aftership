@@ -144,30 +144,30 @@ class GetSupplier extends Command
     public function handle()
     {
 //        Inovel call supplier Leon
-//        $inovel = Tracking::select('order_id')->where('supplier', 'Leon')
-//            ->where('tracking_number', '=', null)->get();
-//        foreach ($inovel as $value) {
-//
-//            $order_id = $value->order_id;
-//            var_dump($order_id);
-//            $json = $this->call_novel($order_id);
-//
-//            $form_data = $this->handing_inovel($json, $order_id);
-//
-//        }
-
-//        Ibedding call supplier Tony
-        $ibeđing = Tracking::select('order_id')->where('supplier', 'Tony')
-            ->where('tracking_number', null)->get();
-
-        foreach ($ibeđing as $value) {
+        $inovel = Tracking::select('order_id')->where('supplier', 'Leon')
+            ->where('tracking_number', '=', null)->get();
+        foreach ($inovel as $value) {
 
             $order_id = $value->order_id;
             var_dump($order_id);
+            $json = $this->call_novel($order_id);
 
-            $json = $this->call_ibedding($order_id);
+            $form_data = $this->handing_inovel($json, $order_id);
 
-            $form_data = $this->handling_ibedding($json, $order_id);
         }
+
+//        Ibedding call supplier Tony
+//        $ibeđing = Tracking::select('order_id')->where('supplier', 'Tony')
+//            ->where('tracking_number', null)->get();
+//
+//        foreach ($ibeđing as $value) {
+//
+//            $order_id = $value->order_id;
+//            var_dump($order_id);
+//
+//            $json = $this->call_ibedding($order_id);
+//
+//            $form_data = $this->handling_ibedding($json, $order_id);
+//        }
     }
 }

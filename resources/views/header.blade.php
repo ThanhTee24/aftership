@@ -7,9 +7,9 @@
 {{--            <ul class="menu-nav">--}}
 {{--                <li class="menu-item menu-item-submenu menu-item-rel" data-menu-toggle="click"--}}
 {{--                    aria-haspopup="true">--}}
-{{--                    <form action="{{route('call_tracking')}}" method="post" enctype="multipart/form-data" >@csrf--}}
-{{--                        <button type="submit" class="btn-success form-control" name="call">Call tracking</button>--}}
-{{--                    </form>--}}
+                    <form action="{{route('call_tracking')}}" method="post" enctype="multipart/form-data" >@csrf
+                        <button type="submit" class="btn-success form-control" name="call">Call tracking</button>
+                    </form>
 {{--                    <form action="{{route('exportfile')}}" method="get" enctype="multipart/form-data" hidden>@csrf--}}
 {{--                        <button type="submit" class="btn-success form-control" name="call">Export Tracking</button>--}}
 {{--                    </form>--}}
