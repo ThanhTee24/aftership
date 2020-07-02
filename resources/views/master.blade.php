@@ -122,7 +122,7 @@
 
                             <div class="card-header flex-wrap py-3">
                                 <div hidden>
-                                    <a href="{{route('page')}}" class="btn btn-success ">Tracking</a>
+                                    <a href="{{route('page')}}" class="btn btn-success">Tracking</a>
 {{--                                    <a href="{{route('paypal')}}" class="btn btn-success ">Paypal</a>--}}
                                 </div>
                                 <div class="card-toolbar">

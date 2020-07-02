@@ -25,15 +25,18 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('minute:update')
-            ->daily();
+            ->twiceDaily(1, 13);
 
         $schedule->command('Get:OrderID')
             ->daily();
 
         $schedule->command('Get:Supplier')
-            ->daily();
+            ->dailyAt('18:00');
 
         $schedule->command('Get:UpdateDay')
+            ->dailyAt('3:00');
+
+        $schedule->command('Get:Paypal')
             ->daily();
     }
 

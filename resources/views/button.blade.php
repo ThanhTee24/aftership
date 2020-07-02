@@ -125,8 +125,8 @@
             });
         </script>
         <form>
-            <a  id="export-file" class="square btn btn-outline-primary"><i
-                    class="fa fa-file-excel-o icon-md text-btnex d-flex align-items-center justify-content-center font-action">Expport</i>
+            <a  id="export-file" class="square btn btn-outline-primary">
+                <i class="fa fa-file-excel-o icon-md text-btnex d-flex align-items-center justify-content-center font-action">Expport</i>
             </a>
         </form>
 
@@ -134,6 +134,13 @@
             <a class="square export-modal btn btn-secondary btn-outline-info" data-toggle="modal"
                data-target="#export-modal">
                 <i class="fa fa-cubes icon-md text-btnex d-flex align-items-center justify-content-center font-action">Op.export</i>
+            </a>
+        </form>
+
+        <form class="Op.export">
+            <a class="square add-account-modal btn btn-secondary btn-outline-info" data-toggle="modal"
+               data-target="#export-modal">
+                <i class="fa fa-cubes icon-md text-btnex d-flex align-items-center justify-content-center font-action">Add.Paypall</i>
             </a>
         </form>
 

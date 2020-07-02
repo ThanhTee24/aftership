@@ -18,10 +18,17 @@ Route::get('/', [
     'uses' => 'PageController@getPage'
 ]);
 
-Route::get('getdata', 'PageController@getdata')->name('getdata');
+Route::get('dataPage', 'PageController@dataPage')->name('dataPage');
+
+Route::get('pendingPage', 'PageController@pendingPage')->name('pendingPage');
+
 
 Route::get('getdatapaypal', 'PageController@getpaypal')->name('getpaypal');
 
+Route::get('pending',[
+    'as' => 'pending',
+    'uses' => 'PageController@getpending'
+]);
 
 Route::get('getpay_pal', 'PageController@getdata')->name('getpay_pal');
 

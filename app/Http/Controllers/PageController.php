@@ -6,7 +6,10 @@ use App\Model\Crawl_bighub;
 use App\Model\Detail;
 use App\Model\List_paypal_account;
 use App\Model\List_supplier;
+use App\Model\List_use_paypal;
+use App\Model\Manage_big_com_sites;
 use App\Model\Paypal_acconut;
+use App\Model\Suppliers;
 use App\Model\Tracking;
 use Facades\App\Respository\Tracking_cache;
 use App\Model\Delivery_status;
@@ -44,23 +47,61 @@ class PageController extends Controller
         return view('page', compact('list_supplier', 'list_total_day'));
     }
 
-    public function getdata()
+    public function getpending()
     {
-        $start = request()->get('start');
-        $length = request()->get('length');
+        $list_total_day = DB::table('detail')
+            ->select('total_day')
+            ->where('step_number', 0)
+            ->where('total_day', '>=', 15)
+            ->groupBy('total_day')
+            ->having(DB::raw("count(total_day)"), '>', 1)
+            ->get();
 
+        $list_supplier = List_supplier::all();
+        return view('pending', compact('list_supplier', 'list_total_day'));
+    }
+
+    public function dataPage()
+    {
         $data = DB::table('delivery_status')->Join('detail', function ($join) {
             $join->on('delivery_status.id', '=', 'detail.delivery_status')
                 ->where('detail.step_number', '=', 0);
         })
             ->rightJoin('tracking', 'detail.tracking_number', '=', 'tracking.tracking_number')
-            ->where('tracking.tracking_number', '<>', null)
+            ->join('suppliers', 'tracking.supplier', 'suppliers.id')
             ->select('tracking.id', 'tracking.order_date', 'tracking.order_id', 'tracking.courier',
                 'tracking.tracking_number', 'tracking.tracking_date', 'tracking.count_day', 'tracking.note', 'tracking.created_at',
-                'tracking.supplier', 'tracking.approved',
+                'suppliers.name as supplier', 'tracking.approved',
                 'detail.process_content', 'detail.process_date', 'delivery_status.name as status',
-                'detail.total_day as total')
-            ->orderBy('count_day', 'DESC');
+                'detail.total_day as total');
+
+
+        return $this->getdata($data);;
+    }
+
+    public function pendingPage()
+    {
+        $data = DB::table('delivery_status')->Join('detail', function ($join) {
+            $join->on('delivery_status.id', '=', 'detail.delivery_status')
+                ->where('detail.step_number', '=', 0);
+        })
+            ->rightJoin('tracking', 'detail.tracking_number', '=', 'tracking.tracking_number')
+            ->join('suppliers', 'tracking.supplier', 'suppliers.id')
+            ->where('delivery_status.id', '<>', 5)
+            ->where('detail.total_day', '>=', 15)
+            ->select('tracking.id', 'tracking.order_date', 'tracking.order_id', 'tracking.courier',
+                'tracking.tracking_number', 'tracking.tracking_date', 'tracking.count_day', 'tracking.note', 'tracking.created_at',
+                'suppliers.name as supplier', 'tracking.approved',
+                'detail.process_content', 'detail.process_date', 'delivery_status.name as status',
+                'detail.total_day as total');
+
+//        $data->join('manage_big_com_sites', 'tracking.site', '=', 'manage_big_com_sites.id');
+
+        return $this->getdata($data);;
+    }
+
+    public function getdata($data)
+    {
 
         return DataTables()::of($data)
             ->addColumn('action', function ($value) {
@@ -140,10 +181,20 @@ class PageController extends Controller
             ->filterColumn('note', function ($query, $keyword) {
                 $sql = "tracking.note like ?";
                 $query->whereRaw($sql, ["%{$keyword}%"]);
-            })
+            })->setRowId('order_id')
 //            ->skipTotalRecords(10)
 //            ->setFilteredRecords(1000)
             ->toJson();
+    }
+
+    public function getSiteID($site_name)
+    {
+        $site_id = Suppliers::select('id')->where('name', $site_name)->limit(1)->get();
+        foreach ($site_id as $value) {
+            $id = $value->id;
+        }
+
+        return $id;
     }
 
     function csvToArray($filename = '', $delimiter = ',')
@@ -166,6 +217,8 @@ class PageController extends Controller
                 $time = strtotime($data[0] . "\n");
                 $today = date("yy/m/d");
 
+                $site_id = $this->getSiteID($data[6]);
+
                 if ($time == false) {
                     $form_data = array(
                         'order_date' => $data[0],
@@ -173,7 +226,7 @@ class PageController extends Controller
                         'transaction_id' => $data[3],
                         'courier' => $data[4],
                         'tracking_number' => $data[5],
-                        'supplier' => $data[6],
+                        'supplier' => $site_id,
                         'tracking_date' => $today
                     );
                 } else {
@@ -185,7 +238,7 @@ class PageController extends Controller
                         'transaction_id' => $data[3],
                         'courier' => $data[4],
                         'tracking_number' => $data[5],
-                        'supplier' => $data[6],
+                        'supplier' =>$site_id,
                         'tracking_date' => $today
                     );
                 }
@@ -219,7 +272,7 @@ class PageController extends Controller
                 $customerArr = $this->csvToArray($file);
                 return back();
             } catch (\Exception $e) {
-                return "File bị lỗi";
+                return $e;
             }
 
 //        Excel::import(new TrackingImportFile, request()->file('file'));
@@ -461,14 +514,19 @@ class PageController extends Controller
 
     public function GetPaypalAccount()
     {
+        $list_site = DB::table('tracking')
+            ->select('site')
+            ->groupBy('site')
+            ->having(DB::raw("count(site)"), '>', 0)
+            ->get();
 
-        return view('paypal_account');
+        return view('paypal_account', compact('list_site'));
     }
 
     public function GetDataAccount()
     {
 
-        $data_account = Paypal_acconut::query();
+        $data_account = List_use_paypal::query();
 
         return DataTables()::of($data_account)->make(true);
     }
@@ -494,7 +552,7 @@ class PageController extends Controller
                 'paypal_account' => $request->paypal_account
             );
 
-            Paypal_acconut::create($form_data);
+            List_use_paypal::create($form_data);
             return Response::json(array('success' => 'success'));
         }
 

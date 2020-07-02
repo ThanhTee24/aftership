@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Model\List_use_paypal;
 use App\Model\Paypal_acconut;
 use App\Model\Tracking;
 use Illuminate\Console\Command;
@@ -39,12 +40,19 @@ class PaypalAccount extends Command
      */
     public function handle()
     {
-        $paypal = Paypal_acconut::orderBy('id', 'DESC')->limit(1)->get();
-dd($paypal);
-//        foreach ($paypal as $value){
-//            Tracking::where('tracking_date', '>=', $value->to_date)
-//                ->where('tracking_date', '<=', $value->from_date)
-//                ->where('paypal_account', null)
-//        }
+        $paypal = List_use_paypal::orderby('id', 'DESC')->limit(1)->get();
+
+        foreach ($paypal as $paypal){
+            $null_account_paypal = Tracking::where('order_date', '>=', $paypal->to_date)
+                ->where('order_date', '<=', $paypal->from_date)
+                ->where('paypal_account', null)
+                ->select('id')
+                ->get();
+
+            foreach ($null_account_paypal as $null_account_paypal){
+                var_dump($null_account_paypal->id);
+                Tracking::where('id', $null_account_paypal->id)->update(['paypal_account' => $paypal->paypal_account]);
+            }
+        }
     }
 }

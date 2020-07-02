@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use App\Http\Controllers\Api\TrackingController;
 use Illuminate\Support\Facades\DB;
 use mysql_xdevapi\Exception;
-use Illuminate\Support\Facades\Log;
+use Log;
 
 class everyMiute extends Command
 {
@@ -234,14 +234,14 @@ class everyMiute extends Command
             $delivery_status = 1;
         } elseif ($statusCode == 'transit' && $status == 'Out for Delivery') {
             $delivery_status = 3;
-        } elseif ($status == 'RESCHEDULED'
+        } elseif ($statusCode == 'transit' && $status == 'PROCESSED THROUGH SORT FACILITY'
+            || $status == 'RESCHEDULED'
             || $status == 'FORWARDED') {
             $delivery_status = 4;
-        } elseif ($statusCode == 'transit' && $status == 'PROCESSED THROUGH SORT FACILITY') {
-            $delivery_status = 2;
+
         } elseif ($statusCode == 'failure') {
             $delivery_status = 4;
-        } elseif ($statusCode == 'delivered') {
+        } elseif (preg_match('/delivery/', $statusCode) == true) {
             $delivery_status = 5;
         } else {
             $delivery_status = 2;
@@ -1145,65 +1145,66 @@ class everyMiute extends Command
     public
     function handle()
     {
+        Log:info("Run cron get tracking");
 
-//        DB::table('tracking')->where('approved', '=', 1)->update(['approved' => null]);
-//        var_dump("Approved = null");
-//
-////        Yun express=====================================================================
-//
-//        $yunexpress = Tracking::select('id', 'tracking_number')->where('courier', '=', 'Yun Express')
-//            ->where('approved', '=', null)->get();
-//
-//        foreach ($yunexpress as $value) {
-//            $tracking_number = $value->tracking_number;
-//            $id = $value->id;
-//            var_dump($tracking_number);
-//
-//            $json = $this->call_yun($tracking_number);
-//
-//            $form_data = $this->handling_yun($json, $tracking_number, $id);
-//
-//        }
+        DB::table('tracking')->where('approved', '=', 1)->update(['approved' => null]);
+        var_dump("Approved = null");
+
+//        Yun express=====================================================================
+
+        $yunexpress = Tracking::select('id', 'tracking_number')->where('courier', '=', 'Yun Express')
+            ->where('approved', '=', null)->get();
+
+        foreach ($yunexpress as $value) {
+            $tracking_number = $value->tracking_number;
+            $id = $value->id;
+            var_dump($tracking_number);
+
+            $json = $this->call_yun($tracking_number);
+
+            $form_data = $this->handling_yun($json, $tracking_number, $id);
+
+        }
 
 //        DHL=====================================================================
 
-//        $dhl = Tracking::Where(function ($query) {
-//            $query->where('courier', '=', 'DHL')
-//                ->orwhere('courier', '=', 'DHL eCommerce');
-//        })
-//            ->where('approved', '=', null)
-//            ->where('tracking_number', '<>', null)
-//            ->select('id', 'tracking_number')->get();
-//
-//        foreach ($dhl as $value) {
-//
-//            $tracking_number = $value->tracking_number;
-//            $id = $value->id;
-//            var_dump($tracking_number);
-//
-//            $json = $this->call_dhl($tracking_number);
-//
-//            $form_data = $this->handling_dhl($json, $tracking_number, $id);
-//        }
-//
-//        //Fedex=====================================================================
-//
-//        $fedex = Tracking::where('courier', '=', 'Fedex')
-//            ->where('approved', '=', null)
-//            ->where('tracking_number', '<>', null)
-//            ->select('id', 'tracking_number')->get();
-//
-//        foreach ($fedex as $value) {
-//
-//            $tracking_number = $value->tracking_number;
-//            $id = $value->id;
-//            var_dump($tracking_number);
-//
-//            $json = $this->call_fedex($tracking_number);
-//
-//            $form_data = $this->handling_fedex($json, $tracking_number, $id);
-//
-//        }
+        $dhl = Tracking::Where(function ($query) {
+            $query->where('courier', '=', 'DHL')
+                ->orwhere('courier', '=', 'DHL eCommerce');
+        })
+            ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
+            ->select('id', 'tracking_number')->get();
+
+        foreach ($dhl as $value) {
+
+            $tracking_number = $value->tracking_number;
+            $id = $value->id;
+            var_dump($tracking_number);
+
+            $json = $this->call_dhl($tracking_number);
+
+            $form_data = $this->handling_dhl($json, $tracking_number, $id);
+        }
+
+        //Fedex=====================================================================
+
+        $fedex = Tracking::where('courier', '=', 'Fedex')
+            ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
+            ->select('id', 'tracking_number')->get();
+
+        foreach ($fedex as $value) {
+
+            $tracking_number = $value->tracking_number;
+            $id = $value->id;
+            var_dump($tracking_number);
+
+            $json = $this->call_fedex($tracking_number);
+
+            $form_data = $this->handling_fedex($json, $tracking_number, $id);
+
+        }
 //
 //
 ////        //USPS=====================================================================
@@ -1230,38 +1231,39 @@ class everyMiute extends Command
 //
 //////        UPS==========================================================
 //
-//        $ups = Tracking::where('courier', '=', 'UPS')
-//            ->where('approved', '=', null)
-//            ->where('tracking_number', '<>', null)
-//            ->select('id', 'tracking_number')->get();
+        $ups = Tracking::where('courier', '=', 'UPS')
+            ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
+            ->select('id', 'tracking_number')->get();
+
+        foreach ($ups as $value) {
+            $tracking_number = $value->tracking_number;
+            $id = $value->id;
+            var_dump($tracking_number);
+
+            $json = $this->call_ups($tracking_number);
+
+            $form_data = $this->handling_ups($json, $tracking_number, $id);
+        }
 //
-//        foreach ($ups as $value) {
-//            $tracking_number = $value->tracking_number;
-//            $id = $value->id;
-//            var_dump($tracking_number);
-//
-//            $json = $this->call_ups($tracking_number);
-//
-//            $form_data = $this->handling_ups($json, $tracking_number, $id);
-//        }
-////
-////        YANWEN===========================================
-//
-//        $yanwen = Tracking::where('courier', '=', 'YANWEN')
-//            ->where('approved', '=', null)
-//            ->where('tracking_number', '<>', null)
-//            ->select('id', 'tracking_number')->get();
-//
-//        foreach ($yanwen as $value) {
-//            $tracking_number = $value->tracking_number;
-//            $id = $value->id;
-//            var_dump($tracking_number);
-//
-//            $json = $this->call_yanwen($tracking_number);
-//
-//            $form_data = $this->handling_yanwen($json, $tracking_number, $id);
-//
-//        }
+//        YANWEN===========================================
+
+        $yanwen = Tracking::where('courier', '=', 'YANWEN')
+            ->where('approved', '=', null)
+            ->where('tracking_number', '<>', null)
+            ->select('id', 'tracking_number')->get();
+
+        foreach ($yanwen as $value) {
+            $tracking_number = $value->tracking_number;
+            $id = $value->id;
+            var_dump($tracking_number);
+
+            $json = $this->call_yanwen($tracking_number);
+
+            $form_data = $this->handling_yanwen($json, $tracking_number, $id);
+
+        }
+
     }
 
 }

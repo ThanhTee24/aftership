@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Model\Detail;
+use Log;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -39,9 +40,10 @@ class UpdateDay extends Command
      */
     public function handle()
     {
+        Log::info('Run cron update day');
         DB::beginTransaction();
         try {
-            DB::table('tracking')->update(['count_day' => DB::raw('DATEDIFF(now(), tracking_date)')]);
+            DB::table('tracking')->update(['count_day' => DB::raw('DATEDIFF(now(), order_date)')]);
 
             DB::table('detail')->update(['total_day' => DB::raw('DATEDIFF(now(), process_date)')]);
 

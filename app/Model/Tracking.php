@@ -10,7 +10,7 @@ class Tracking extends Model
 
     protected $fillable = [
         'order_date', 'order_id', 'courier', 'tracking_number', 'supplier_access',
-        'paypal_account', 'transaction_id', 'supplier', 'order_status', 'tracking_date'
+        'paypal_account', 'transaction_id', 'supplier', 'order_status', 'tracking_date', 'site'
     ];
 
     public function scopeOrder_date($query, $order_date)

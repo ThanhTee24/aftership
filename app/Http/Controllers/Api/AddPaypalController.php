@@ -12,16 +12,15 @@ class AddPaypalController extends Controller
 {
     public function add_paypal(Request $request)
     {
-
-
         $carrier = Carrier::where('courier_tracking', '=', $request->carrier)->select('carrier_paypal')->get()->toArray();
 
         if (empty($carrier) == true) {
-            $courier = str_replace(" ","%20",$request->carrier);
+
+            $courier = str_replace(" ", "%20", $request->carrier);
             $curl = curl_init();
 
             curl_setopt_array($curl, array(
-                CURLOPT_URL => "http://api.paypal.esrax.com/trackers/?email=".$request->paypal_account."&transacionId=".$request->transaction_id."&trackingNumber=".$request->tracking."&carrier=OTHER&carrierName=".$courier."&status=SHIPPED&type=add",
+                CURLOPT_URL => "http://api.paypal.esrax.com/trackers/?email=" . $request->paypal_account . "&transacionId=" . $request->transaction_id . "&trackingNumber=" . $request->tracking . "&carrier=OTHER&carrierName=" . $courier . "&status=SHIPPED&type=add",
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,

@@ -215,7 +215,7 @@ class UpdateTrackingController extends Controller
 
         } elseif ($statusCode == 'failure') {
             $delivery_status = 4;
-        } elseif ($statusCode == 'delivered') {
+        } elseif (preg_match('/delivery/', $statusCode) == true) {
             $delivery_status = 5;
         } else {
             $delivery_status = 2;
@@ -497,7 +497,7 @@ class UpdateTrackingController extends Controller
                     var_dump("DHL eCommerce : True");
 
                 } else {
-
+//               dd($json);
                     Detail::where('tracking_number', $tracking_number)->delete();
                     $i = 0;
 
@@ -513,7 +513,7 @@ class UpdateTrackingController extends Controller
                             $delivery_status = 4;
                         } elseif ($value->description == 'Shipment on hold') {
                             $delivery_status = 7;
-                        } elseif ($value->description == 'Delivered') {
+                        } elseif (preg_match('/Delivered/', $value->description) == true) {
                             $delivery_status = 5;
                         } elseif ($value->description == 'Shipment information received') {
                             $delivery_status = 1;

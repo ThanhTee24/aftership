@@ -64,24 +64,336 @@
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
                 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
-                    <a href="{{route('page')}}" class="menu-link menu-toggle">
+                    <a class="menu-link menu-toggle">
 										<span class="svg-icon menu-icon">
 											<!--begin::Svg Icon | path:assets/media/svg/icons/Layout/Layout-4-blocks.svg-->
-											<svg xmlns="http://www.w3.org/2000/svg"
-                                                 xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px"
-                                                 viewBox="0 0 24 24" version="1.1">
+											<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
 												<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-													<rect x="0" y="0" width="24" height="24"/>
-													<rect fill="#000000" x="4" y="4" width="7" height="7" rx="1.5"/>
-													<path
-                                                        d="M5.5,13 L9.5,13 C10.3284271,13 11,13.6715729 11,14.5 L11,18.5 C11,19.3284271 10.3284271,20 9.5,20 L5.5,20 C4.67157288,20 4,19.3284271 4,18.5 L4,14.5 C4,13.6715729 4.67157288,13 5.5,13 Z M14.5,4 L18.5,4 C19.3284271,4 20,4.67157288 20,5.5 L20,9.5 C20,10.3284271 19.3284271,11 18.5,11 L14.5,11 C13.6715729,11 13,10.3284271 13,9.5 L13,5.5 C13,4.67157288 13.6715729,4 14.5,4 Z M14.5,13 L18.5,13 C19.3284271,13 20,13.6715729 20,14.5 L20,18.5 C20,19.3284271 19.3284271,20 18.5,20 L14.5,20 C13.6715729,20 13,19.3284271 13,18.5 L13,14.5 C13,13.6715729 13.6715729,13 14.5,13 Z"
-                                                        fill="#000000" opacity="0.3"/>
+													<rect x="0" y="0" width="24" height="24" />
+													<rect fill="#000000" x="4" y="4" width="7" height="7" rx="1.5" />
+													<path d="M5.5,13 L9.5,13 C10.3284271,13 11,13.6715729 11,14.5 L11,18.5 C11,19.3284271 10.3284271,20 9.5,20 L5.5,20 C4.67157288,20 4,19.3284271 4,18.5 L4,14.5 C4,13.6715729 4.67157288,13 5.5,13 Z M14.5,4 L18.5,4 C19.3284271,4 20,4.67157288 20,5.5 L20,9.5 C20,10.3284271 19.3284271,11 18.5,11 L14.5,11 C13.6715729,11 13,10.3284271 13,9.5 L13,5.5 C13,4.67157288 13.6715729,4 14.5,4 Z M14.5,13 L18.5,13 C19.3284271,13 20,13.6715729 20,14.5 L20,18.5 C20,19.3284271 19.3284271,20 18.5,20 L14.5,20 C13.6715729,20 13,19.3284271 13,18.5 L13,14.5 C13,13.6715729 13.6715729,13 14.5,13 Z" fill="#000000" opacity="0.3" />
 												</g>
 											</svg>
                                             <!--end::Svg Icon-->
 										</span>
                         <span class="menu-text">Tracking</span>
+                        <i class="menu-arrow"></i>
                     </a>
+                    <div class="menu-submenu">
+                        <i class="menu-arrow"></i>
+                        <ul class="menu-subnav">
+                            <li class="menu-item menu-item-parent" aria-haspopup="true">
+												<span class="menu-link">
+													<span class="menu-text">Tracking</span>
+												</span>
+                            </li>
+                            <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+                                <a href="{{route('page')}}" class="menu-link menu-toggle">
+                                    <i class="menu-bullet menu-bullet-line">
+                                        <span></span>
+                                    </i>
+                                    <span class="menu-text">Detail</span>
+                                </a>
+                            </li>
+                            <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+                                <a href="{{route('pending')}}" class="menu-link menu-toggle" title="Total day greater than 15 days">
+                                    <i class="menu-bullet menu-bullet-line">
+                                        <span></span>
+                                    </i>
+                                    <span class="menu-text">More than 15 days</span>
+                                </a>
+                            </li>
+{{--                            <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">--}}
+{{--                                <a href="javascript:;" class="menu-link menu-toggle">--}}
+{{--                                    <i class="menu-bullet menu-bullet-line">--}}
+{{--                                        <span></span>--}}
+{{--                                    </i>--}}
+{{--                                    <span class="menu-text">Contacts</span>--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                </a>--}}
+{{--                                <div class="menu-submenu">--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                    <ul class="menu-subnav">--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/contacts/list-columns.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">List - Columns</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/contacts/list-datatable.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">List - Datatable</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/contacts/view-contact.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">View Contact</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/contacts/add-contact.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Add Contact</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/contacts/edit-contact.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Edit Contact</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                    </ul>--}}
+{{--                                </div>--}}
+{{--                            </li>--}}
+{{--                            <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">--}}
+{{--                                <a href="javascript:;" class="menu-link menu-toggle">--}}
+{{--                                    <i class="menu-bullet menu-bullet-line">--}}
+{{--                                        <span></span>--}}
+{{--                                    </i>--}}
+{{--                                    <span class="menu-text">Projects</span>--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                </a>--}}
+{{--                                <div class="menu-submenu">--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                    <ul class="menu-subnav">--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/projects/list-columns-1.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">List - Columns 1</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/projects/list-columns-2.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">List - Columns 2</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/projects/list-columns-3.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">List - Columns 3</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/projects/list-columns-4.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">List - Columns 4</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/projects/list-datatable.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">List - Datatable</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/projects/view-project.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">View Project</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/projects/add-project.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Add Project</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/projects/edit-project.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Edit Project</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                    </ul>--}}
+{{--                                </div>--}}
+{{--                            </li>--}}
+{{--                            <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">--}}
+{{--                                <a href="javascript:;" class="menu-link menu-toggle">--}}
+{{--                                    <i class="menu-bullet menu-bullet-line">--}}
+{{--                                        <span></span>--}}
+{{--                                    </i>--}}
+{{--                                    <span class="menu-text">Support Center</span>--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                </a>--}}
+{{--                                <div class="menu-submenu">--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                    <ul class="menu-subnav">--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/support-center/home-1.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Home 1</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/support-center/home-2.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Home 2</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/support-center/faq-1.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">FAQ 1</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/support-center/faq-2.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">FAQ 2</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/support-center/faq-3.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">FAQ 3</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/support-center/feedback.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Feedback</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/support-center/license.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">License</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                    </ul>--}}
+{{--                                </div>--}}
+{{--                            </li>--}}
+{{--                            <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">--}}
+{{--                                <a href="javascript:;" class="menu-link menu-toggle">--}}
+{{--                                    <i class="menu-bullet menu-bullet-line">--}}
+{{--                                        <span></span>--}}
+{{--                                    </i>--}}
+{{--                                    <span class="menu-text">Chat</span>--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                </a>--}}
+{{--                                <div class="menu-submenu">--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                    <ul class="menu-subnav">--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/chat/private.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Private</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/chat/group.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Group</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/chat/popup.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Popup</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                    </ul>--}}
+{{--                                </div>--}}
+{{--                            </li>--}}
+{{--                            <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">--}}
+{{--                                <a href="javascript:;" class="menu-link menu-toggle">--}}
+{{--                                    <i class="menu-bullet menu-bullet-line">--}}
+{{--                                        <span></span>--}}
+{{--                                    </i>--}}
+{{--                                    <span class="menu-text">Todo</span>--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                </a>--}}
+{{--                                <div class="menu-submenu">--}}
+{{--                                    <i class="menu-arrow"></i>--}}
+{{--                                    <ul class="menu-subnav">--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/todo/tasks.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Tasks</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/todo/docs.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Docs</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li class="menu-item" aria-haspopup="true">--}}
+{{--                                            <a href="custom/apps/todo/files.html" class="menu-link">--}}
+{{--                                                <i class="menu-bullet menu-bullet-dot">--}}
+{{--                                                    <span></span>--}}
+{{--                                                </i>--}}
+{{--                                                <span class="menu-text">Files</span>--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                    </ul>--}}
+{{--                                </div>--}}
+{{--                            </li>--}}
+{{--                            <li class="menu-item" aria-haspopup="true">--}}
+{{--                                <a href="custom/apps/inbox.html" class="menu-link">--}}
+{{--                                    <i class="menu-bullet menu-bullet-line">--}}
+{{--                                        <span></span>--}}
+{{--                                    </i>--}}
+{{--                                    <span class="menu-text">Inbox</span>--}}
+{{--                                    <span class="menu-label">--}}
+{{--														<span class="label label-danger label-inline">new</span>--}}
+{{--													</span>--}}
+{{--                                </a>--}}
+{{--                            </li>--}}
+                        </ul>
+                    </div>
                 </li>
                 <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
                     <a href="{{route('paypal_table')}}" class="menu-link menu-toggle">
@@ -102,6 +414,22 @@
                                             <!--end::Svg Icon-->
 										</span>
                         <span class="menu-text">Paypal</span>
+                    </a>
+                </li>
+                <li class="menu-item menu-item-submenu" aria-haspopup="true" data-menu-toggle="hover">
+                    <a href="{{route('paypal_account')}}" class="menu-link menu-toggle" title="">
+										<span class="svg-icon menu-icon">
+																<!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Safe-chat.svg-->
+																<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+																	<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+																		<rect x="0" y="0" width="24" height="24" />
+																		<path d="M8,17 C8.55228475,17 9,17.4477153 9,18 L9,21 C9,21.5522847 8.55228475,22 8,22 L3,22 C2.44771525,22 2,21.5522847 2,21 L2,18 C2,17.4477153 2.44771525,17 3,17 L3,16.5 C3,15.1192881 4.11928813,14 5.5,14 C6.88071187,14 8,15.1192881 8,16.5 L8,17 Z M5.5,15 C4.67157288,15 4,15.6715729 4,16.5 L4,17 L7,17 L7,16.5 C7,15.6715729 6.32842712,15 5.5,15 Z" fill="#000000" opacity="0.3" />
+																		<path d="M2,11.8650466 L2,6 C2,4.34314575 3.34314575,3 5,3 L19,3 C20.6568542,3 22,4.34314575 22,6 L22,15 C22,15.0032706 21.9999948,15.0065399 21.9999843,15.009808 L22.0249378,15 L22.0249378,19.5857864 C22.0249378,20.1380712 21.5772226,20.5857864 21.0249378,20.5857864 C20.7597213,20.5857864 20.5053674,20.4804296 20.317831,20.2928932 L18.0249378,18 L12.9835977,18 C12.7263047,14.0909841 9.47412135,11 5.5,11 C4.23590829,11 3.04485894,11.3127315 2,11.8650466 Z M6,7 C5.44771525,7 5,7.44771525 5,8 C5,8.55228475 5.44771525,9 6,9 L15,9 C15.5522847,9 16,8.55228475 16,8 C16,7.44771525 15.5522847,7 15,7 L6,7 Z" fill="#000000" />
+																	</g>
+																</svg>
+                                            <!--end::Svg Icon-->
+															</span>
+                        <span class="menu-text">List use Paypal cccount</span>
                     </a>
                 </li>
             </ul>

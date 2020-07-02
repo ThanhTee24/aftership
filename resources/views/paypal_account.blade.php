@@ -48,9 +48,20 @@
                             <input type="text" class="form-control" name="paypal_acconut">
                         </div>
                     </div>
+                    <div class="form-group" >
+
+                        <label class="control-label col-sm-6" for="name">Site</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="site">
+                                @foreach($list_site as $value)
+                                    <option value="{{$value->id}}">{{$value->site_name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                     <div class="modal-footer">
 
-                        <button type="button" class="btn actionBtn">
+                        <button type="button" class="btn actionBtn" data-dismiss="modal">
                             <span id="footer_action_button_1" class="si">Add</span>
                         </button>
 

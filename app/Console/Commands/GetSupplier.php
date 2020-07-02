@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Model\Tracking;
 use Illuminate\Console\Command;
+use Log;
 
 class GetSupplier extends Command
 {
@@ -71,30 +72,34 @@ class GetSupplier extends Command
 
     public function handing_inovel($json, $order_id)
     {
-        if ($json->code == '200') {
+        if (isset($json->code)) {
+            if ($json->code == '200') {
 
-            $result = $json->result;
+                $result = $json->result;
 
-            $courier = $this->mapping_inovel($result->waybillCode);
+                if ($result->waybillCode != null) {
+                    $courier = $this->mapping_inovel($result->waybillCode);
 
-            $order_id_update = array(
-                'order_id' => $order_id
-            );
+                    $order_id_update = array(
+                        'order_id' => $order_id
+                    );
 
-            $form_data = array(
-                'tracking_number' => $result->waybillCode,
-                'courier' => $courier,
-                'supplier_access' => 1
-            );
+                    $form_data = array(
+                        'tracking_number' => $result->waybillCode,
+                        'courier' => $courier,
+                        'supplier_access' => 1
+                    );
 
-            var_dump($form_data);
+                    var_dump($form_data);
 
-            Tracking::updateOrCreate($order_id_update, $form_data);
-
+                    Tracking::updateOrCreate($order_id_update, $form_data);
+                }
+            }
         }
     }
 
-    public function call_ibedding($order_id){
+    public function call_ibedding($order_id)
+    {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -117,7 +122,8 @@ class GetSupplier extends Command
         return $json;
     }
 
-    public function handling_ibedding($json, $order_id){
+    public function handling_ibedding($json, $order_id)
+    {
         if (isset($json->orderDataList[0])) {
             $orderDataList = $json->orderDataList[0];
 
@@ -126,6 +132,7 @@ class GetSupplier extends Command
             );
 
             $form_data = array(
+                'supplier' => 'Tony',
                 'tracking_number' => $orderDataList->trackNumber,
                 'courier' => $orderDataList->shippingService,
                 'supplier_access' => 1
@@ -143,9 +150,14 @@ class GetSupplier extends Command
      */
     public function handle()
     {
+        Log::info("Run cron get tracking number, courier from Supplier");
 //        Inovel call supplier Leon
-        $inovel = Tracking::select('order_id')->where('supplier', 'Leon')
-            ->where('tracking_number', '=', null)->get();
+        $inovel = Tracking::select('order_id')
+           ->where('supplier', 'Leon')
+            ->where('update_status', '=', null)
+            ->where('supplier_access', '=', null)
+            ->where('tracking_number', '=', null)
+            ->get();
         foreach ($inovel as $value) {
 
             $order_id = $value->order_id;
@@ -157,17 +169,21 @@ class GetSupplier extends Command
         }
 
 //        Ibedding call supplier Tony
-//        $ibeđing = Tracking::select('order_id')->where('supplier', 'Tony')
-//            ->where('tracking_number', null)->get();
-//
-//        foreach ($ibeđing as $value) {
-//
-//            $order_id = $value->order_id;
-//            var_dump($order_id);
-//
-//            $json = $this->call_ibedding($order_id);
-//
-//            $form_data = $this->handling_ibedding($json, $order_id);
-//        }
+        $ibeđing = Tracking::select('order_id')
+            ->where('supplier', 'Tony')
+            ->where('update_status', '=', null)
+            ->where('supplier_access', '=', null)
+            ->where('tracking_number', '=', null)
+            ->get();
+
+        foreach ($ibeđing as $value) {
+
+            $order_id = $value->order_id;
+            var_dump($order_id);
+
+            $json = $this->call_ibedding($order_id);
+
+            $form_data = $this->handling_ibedding($json, $order_id);
+        }
     }
 }

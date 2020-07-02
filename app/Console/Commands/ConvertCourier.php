@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Model\Detail;
 use App\Model\Tracking;
 use Illuminate\Console\Command;
+use Log;
 
 class ConvertCourier extends Command
 {
@@ -331,9 +332,12 @@ class ConvertCourier extends Command
      */
     public function handle()
     {
-        $dhl = Tracking::
-//        where('courier', '=', 'DHL')
-        where('courier', '=', 'DHL eCommerce')
+        Log::info("Run cron convert courier");
+
+        $dhl = Tracking::Where(function ($query) {
+            $query->where('courier', '=', 'DHL/Fedex')
+                ->orwhere('courier', '=', 'DHL eCommerce');
+        })
             ->whereRaw('LENGTH(tracking_number) > ?', [12])
             ->select('id', 'tracking_number')
             ->get();
