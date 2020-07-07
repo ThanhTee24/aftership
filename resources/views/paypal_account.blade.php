@@ -113,11 +113,22 @@
                 }
             });
         });
+        document.getElementById("myBtn").onclick = function () {
+        myFunction()
+    };
+    /* show my button */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
     </script>
 
 
     <script>
         $(document).ready(function () {
+            document.querySelector(".btn_export ").style.display = "none";
+            document.querySelector(".dropdown ").style.display = "none";
+            $('#upfile-button').attr('style', 'display: none !important');
+
             $('#account').DataTable({
                 processing: true,
                 serverSide: true,
@@ -135,3 +146,4 @@
     </script>
 
 @endsection
+ 

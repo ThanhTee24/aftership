@@ -514,10 +514,8 @@ class PageController extends Controller
 
     public function GetPaypalAccount()
     {
-        $list_site = DB::table('tracking')
-            ->select('site')
-            ->groupBy('site')
-            ->having(DB::raw("count(site)"), '>', 0)
+        $list_site = DB::table('manage_big_com_sites')
+            ->select('id', 'site_name')
             ->get();
 
         return view('paypal_account', compact('list_site'));

@@ -115,6 +115,11 @@
     });
 
     $("#export-file-select").click(function () {
+
+        //TODO: set loading display: block;
+        document.querySelector(".pendingload").style.display = "flex";
+        
+
         $.ajax({
             type: 'POST',
             url: 'exportTracking',
@@ -127,6 +132,10 @@
                 'status': $('select[name=export_status]').val(),
             },
             success: function (data) {
+
+                document.querySelector(".pendingload").style.display = "none";
+                    //TODO: set loading display: none;
+
                 console.log(data);
                 if ((data.errors)) {
                     $('error1').removeClass('hidden');
@@ -156,6 +165,10 @@
 
     $("#export-file").click(function () {
 
+        //TODO: set loading display: block;
+        document.querySelector(".pendingload").style.display = "flex";
+        
+
         $.ajax({
             type: 'POST',
             url: 'export',
@@ -163,6 +176,11 @@
                 '_token': $('input[name=_token]').val(),
             },
             success: function (data) {
+
+                document.querySelector(".pendingload").style.display = "none";
+                
+                    //TODO: set loading display: none;
+
                 console.log(data);
                 if ((data.errors)) {
                     $('error1').removeClass('hidden');za
@@ -185,4 +203,13 @@
         });
 
     });
+
+    // get click button action
+    document.getElementById("myBtn").onclick = function () {
+        myFunction()
+    };
+    /* show my button */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
 </script>

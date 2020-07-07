@@ -1,5 +1,7 @@
 <script>
     $(document).ready(function () {
+        document.querySelector(".btn_export ").style.display = "none";
+        document.querySelector(".Op-export").style.display = "none";
         $('#paypal_table').DataTable({
             dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row'<'col-sm-12'B>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-4'i><'col-sm-12 col-md-8'p>>",
             buttons: [
@@ -84,4 +86,12 @@
     $('select.column_filter').on('change', function () {
         filterColumn($(this).parents('div').attr('data-column'));
     });
+    // get click button action
+    document.getElementById("myBtn").onclick = function () {
+        myFunction()
+    };
+    /* show my button */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
 </script>
