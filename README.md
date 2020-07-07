@@ -1,8 +1,3 @@
-## Delop Laravel app
-- composer update
-- php -r "copy('.env.example', '.env');"
-- php artisan key:generate
-
 <p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
 
 <p align="center">
