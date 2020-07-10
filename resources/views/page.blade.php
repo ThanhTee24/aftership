@@ -38,7 +38,7 @@
 
     <div class="pendingload">
         <h1>PENDING</h1>
-        <img class="pendingload-svg " src="assets/media/svg/loading/Ellipsis-1s-200px (1).svg" >
+        <img class="pendingload-svg " src="assets/media/svg/loading/loading.svg" >
     </div>
 
     <div class="card-body">

@@ -276,8 +276,8 @@ ul.timeline>#c10:before {
     width: 7%;
 }
 .pendingload h1{
-    top: 100;
-    color: white;
+    top: 40vh;
+    color: black;
     position: fixed;
     z-index: 2000;
 }
