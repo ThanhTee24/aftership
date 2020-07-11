@@ -52,7 +52,7 @@
     
 }
 .text-btn {
-    padding-left: 15px;
+    padding-left: 20px;
 }
 
 .fa-upload {}
@@ -196,7 +196,7 @@ ul.timeline>#c10:before {
   } */
 
   .dropbtn {
-    position: relative; left: 2px; top: -5px;
+    position: relative; left: 0px; top: -5px;
     background-color: white;
     color: #6993FF;
     padding: 2px;

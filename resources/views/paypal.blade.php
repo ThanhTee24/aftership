@@ -1,6 +1,10 @@
 @extends('master')
 @section('content')
 
+    <div class="pendingload">
+        <h1>LOADING</h1>
+        <img class="pendingload-svg " src="assets/media/svg/loading/loading.svg" >
+    </div>
     <div class="card-body">
         <form>
             <div class="row">

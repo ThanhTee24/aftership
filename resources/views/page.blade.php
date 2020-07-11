@@ -36,8 +36,8 @@
 
     </style>
 
-    <div class="pendingload">
-        <h1>PENDING</h1>
+    <div class="pendingload" >
+        <h1>LOADING</h1>
         <img class="pendingload-svg " src="assets/media/svg/loading/loading.svg" >
     </div>
 

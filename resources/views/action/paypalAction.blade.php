@@ -131,6 +131,8 @@
 <script type="text/javascript">
 
     $("#export-file").click(function () {
+           //TODO: set loading display: block;
+           document.querySelector(".pendingload").style.display = "flex";
 
         $.ajax({
             type: 'POST',
@@ -139,6 +141,9 @@
                 '_token': $('input[name=_token]').val(),
             },
             success: function (data) {
+                document.querySelector(".pendingload").style.display = "none";
+                
+                    //TODO: set loading display: none;
                 console.log(data);
                 if ((data.errors)) {
                     $('error1').removeClass('hidden');
